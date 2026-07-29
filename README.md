@@ -1,4 +1,4 @@
-For the moment 3 nodes which consist of 
+For the moment 4 nodes which consist of 
 
 Force Changed Node:
 A node that has a model text and seed input, assuming you are using positive and negative conditioning use a Text Concatenate node to concatenate the text into a single string 
