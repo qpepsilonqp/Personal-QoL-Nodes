@@ -1,8 +1,9 @@
 For the moment 3 nodes which consist of 
 
 ForceChangedNode:
-A node that has a model text and seed input, use a Text Concatenate node to concatenate the text into a single string and wire it into the Force Changed (seed + text) node, 
-wire in you seed and wire the model into the Force Changed (seed + text) before a stateful node, it will change and therefore will force the stateful node to recalculate.
+A node that has a model text and seed input, assuming you are using positive and negative conditioning use a Text Concatenate node to concatenate the text into a single string 
+and wire it into the Force Changed (seed + text) node, wire in you seed and wire the model into the Force Changed (seed + text) before a stateful node, it will change and therefore 
+will force the stateful node to recalculate.
 
 SigmasAtPercent:
 Does what it says on the tin, takes the sigmas from your scheduler and allows you to pick the sigmas value at a from 0 to 1, useful for things like 
