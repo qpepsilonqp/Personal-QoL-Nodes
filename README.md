@@ -17,4 +17,4 @@ Resolution 1mp picker:
 every somewhat useful resolution that is roughly 1MP and devisable by 16, honestly I will probably replace this with something a little bit less brute force and add a multiplier, 
 but it's the node I care about the least because there are an ocean of resolution nodes out there, and yeh these are my personal nodes so yeh, I can be lazy :p.
 
-Pretty basic nodes which require no updates, just "git clone" the repo.
+Pretty basic nodes which require no updates, just "git clone" the repo using cmd.
