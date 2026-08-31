@@ -15,8 +15,15 @@ Same as sigmas at percent, but at a step instead of a percent complete, probably
 
 Resolution Picker: 
 A resolution selector with a live preview of the output resolution, select the: 
+
 megapixels 
+
 aspect ratio
-orientation "done so you don't have to have 2 fields in the aspect ratio halving the list size", divisible_by "what the height and width must be divisible by"
+
+orientation 
+done so you don't have to have 2 fields in the aspect ratio halving the list size
+
+divisible_by 
+what the height and width must be divisible by
 
 Pretty basic nodes which require no updates, just "git clone" the repo using cmd.
