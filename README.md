@@ -13,8 +13,10 @@ models use sigmas of 0 to 1 anyway, but it's not linear and is a curve, so if yo
 Sigmas at Step: 
 Same as sigmas at percent, but at a step instead of a percent complete, probably more useful and intuitive too.
 
-Resolution 1mp picker: 
-every somewhat useful resolution that is roughly 1MP and devisable by 16, honestly I will probably replace this with something a little bit less brute force and add a multiplier, 
-but it's the node I care about the least because there are an ocean of resolution nodes out there, and yeh these are my personal nodes so yeh, I can be lazy :p.
+Resolution Picker: 
+A resolution selector with a live preview of the output resolution, select the: 
+megapixels 
+aspect ratio
+orientation "done so you don't have to have 2 fields in the aspect ratio halving the list size", divisible_by "what the height and width must be divisible by"
 
 Pretty basic nodes which require no updates, just "git clone" the repo using cmd.
