@@ -1,0 +1,91 @@
+import asyncio, json, os
+from common import *
+B = "/root/old_comfy/models/loras"
+SOFT = ".spll-lora[data-where=tree][data-path='b1:styles/anime/anime_soft.safetensors']"
+OIL = ".spll-lora[data-where=tree][data-path='b1:styles/painterly/oil_v2.safetensors']"
+async def tip(pg, sel):
+    await pg.mouse.move(5,5); await pg.wait_for_timeout(100)
+    await pg.hover(sel); await pg.wait_for_timeout(600)
+    return (await pg.locator(".spll-tip").inner_text()).replace("\n"," | ")
+async def main():
+    logs=[]
+    async with async_playwright() as p:
+        b = await p.chromium.launch()
+        ctx = await b.new_context(viewport={"width":1500,"height":1100}, permissions=["clipboard-read","clipboard-write"])
+        pg = await ctx.new_page()
+        pg.on("console", lambda m: logs.append(f"{m.type}: {m.text}"))
+        pg.on("pageerror", lambda e: logs.append(f"PAGEERROR: {e}"))
+        await pg.goto("http://127.0.0.1:8188/")
+        await pg.wait_for_function("window.comfyAPI && window.comfyAPI.app && window.comfyAPI.app.app.graph", timeout=60000)
+        await pg.wait_for_timeout(2500); await pg.keyboard.press("Escape")
+        await pg.evaluate(SETUP); await pg.wait_for_timeout(1500)
+        await choose_root(pg)
+        for g in ["styles","anime","painterly"]:
+            await pg.click(f".spll-group:has(.spll-gname:text-is('{g}')) .spll-caret"); await pg.wait_for_timeout(150)
+        print("T grey tooltip:", await tip(pg, SOFT+" .spll-trig"))
+        # grey -> fetch -> save confirm
+        await pg.click(SOFT+" .spll-trig")
+        txt,_ = await confirm(pg, True, "30_save_info.png")
+        print("save dialog:", txt.replace("\n"," | ")[:160])
+        await pg.wait_for_timeout(600)
+        print("info file:", os.path.exists(B+"/styles/anime/anime_soft.safetensors.rgthree-info.json"))
+        print("T class:", await pg.locator(SOFT+" .spll-trig").get_attribute("class"))
+        print("T ready tooltip:", await tip(pg, SOFT+" .spll-trig"))
+        await pg.click(SOFT+" .spll-trig"); await pg.wait_for_timeout(300)
+        await pg.click("[data-act=trig-copy]"); await pg.wait_for_timeout(400)
+        print("clipboard:", await pg.evaluate("navigator.clipboard.readText()"))
+        # oil: fetch, decline save -> red
+        await pg.click(OIL+" .spll-trig")
+        await confirm(pg, False)
+        await pg.wait_for_timeout(400)
+        print("oil info file:", os.path.exists(B+"/styles/painterly/oil_v2.safetensors.rgthree-info.json"), "| T class:", await pg.locator(OIL+" .spll-trig").get_attribute("class"))
+        print("oil red tooltip:", await tip(pg, OIL+" .spll-trig"))
+        await pg.click(OIL+" .spll-trig"); await pg.wait_for_timeout(300)
+        await pg.keyboard.type("oil look, thick paint")
+        await pg.screenshot(path=OUT+"31_trig_popover.png")
+        await pg.keyboard.press("Enter")
+        txt,_ = await confirm(pg, True)
+        print("sidecar dialog:", txt.replace("\n"," | ")[:140])
+        await pg.wait_for_timeout(600)
+        print("oil sidecar:", open(B+"/styles/painterly/oil_v2.safetensors.spll.json").read().replace("\n",""), "| T:", await pg.locator(OIL+" .spll-trig").get_attribute("class"))
+        # toggle anime_soft on -> ids stored
+        await pg.click(SOFT+" .spll-switch"); await pg.wait_for_timeout(300)
+        print("ids:", await pg.evaluate("() => window._n.spll.state.ids"))
+        # info panel
+        await pg.click(SOFT+" .spll-info"); await pg.wait_for_timeout(1200)
+        print("panel title:", await pg.locator(".spll-modal-title").inner_text(), "| rows:", await pg.locator(".spll-info-table th").all_inner_texts())
+        print("video muted:", await pg.evaluate("() => [...document.querySelectorAll('.spll-modal video')].map(v => [v.muted, !v.paused])"))
+        await pg.screenshot(path=OUT+"32_panel.png")
+        await pg.click(".spll-modal video"); await pg.wait_for_timeout(300)
+        print("after click muted:", await pg.evaluate("() => [...document.querySelectorAll('.spll-modal video')].map(v => v.muted)"))
+        # keyboard isolation inside the panel
+        await pg.fill(".spll-modal [data-field=nickname]", "Soft Anime XL"); await pg.keyboard.press("Delete"); await pg.keyboard.press("Control+a")
+        print("node alive:", await pg.evaluate("() => !!window.comfyAPI.app.app.graph.getNodeById(window._n.id)"))
+        await pg.click(".spll-modal [data-pact=save-nickname]")
+        await confirm(pg, True); await pg.wait_for_timeout(500)
+        print("nickname in list:", await pg.locator(SOFT+" .spll-name").inner_text())
+        await pg.click(".spll-modal [data-pact=close]"); await pg.wait_for_timeout(300)
+        print("modal closed:", await pg.locator(".spll-modal").count() == 0)
+        # watercolor: not on civitai, has local preview
+        await pg.click(".spll-lora[data-where=tree][data-path='b1:styles/painterly/watercolor.safetensors'] .spll-info")
+        await pg.wait_for_timeout(1200)
+        await confirm(pg, False)
+        await pg.wait_for_timeout(500)
+        print("watercolor civitai:", await pg.locator(".spll-info-table tr:has(th:text-is('Civitai')) td").inner_text())
+        print("preview img loaded:", await pg.evaluate("() => { const i=document.querySelector('.spll-modal .spll-media img'); return i ? [i.naturalWidth, i.src.split('?')[0]] : null }"))
+        await pg.screenshot(path=OUT+"33_panel_notfound.png")
+        await pg.keyboard.press("Escape"); await pg.wait_for_timeout(200)
+        # alternating colours + blur
+        await pg.evaluate("() => window._n.spll.settingsTab = 'display'"); await pg.click(".spll-gear >> visible=true")
+        await pg.click("input[value=alternating]"); await pg.wait_for_timeout(200)
+        await pg.click("text=Blur example images"); await pg.wait_for_timeout(200)
+        await pg.screenshot(path=OUT+"34_settings.png")
+        await pg.click(".spll-sheet [data-act=close]"); await pg.wait_for_timeout(300)
+        await pg.screenshot(path=OUT+"35_alternating.png")
+        await pg.click(SOFT+" .spll-info"); await pg.wait_for_timeout(1000)
+        print("blurred cards:", await pg.locator(".spll-media.is-blurred").count())
+        await pg.screenshot(path=OUT+"36_blur.png")
+        print("mock requests:", open("mockciv/requests.log").read().count("\n"))
+        print("ERRORS", errs(logs)[:8])
+        await b.close()
+asyncio.run(main())

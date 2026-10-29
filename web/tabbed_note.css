@@ -1,0 +1,508 @@
+/* Tabbed Note — uses ComfyUI theme variables with fallbacks, so it follows light/dark themes. */
+
+.tn-root {
+    --tn-bg: var(--comfy-input-bg, #222);
+    --tn-panel: var(--comfy-menu-bg, #353535);
+    --tn-fg: var(--input-text, #ddd);
+    --tn-muted: var(--descrip-text, #999);
+    --tn-border: var(--border-color, #4e4e4e);
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    color: var(--tn-fg);
+    font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--tn-bg);
+    border: 1px solid var(--tn-border);
+}
+.tn-root *, .tn-menu * { box-sizing: border-box; }
+.tn-horizontal { flex-direction: column; }
+.tn-vertical { flex-direction: row; }
+
+/* ---------- strip ---------- */
+.tn-strip {
+    display: flex;
+    gap: 4px;
+    padding: 5px;
+    background: var(--tn-panel);
+    flex-shrink: 0;
+}
+.tn-horizontal .tn-strip {
+    flex-wrap: wrap;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--tn-border);
+    max-height: 45%;
+    overflow-y: auto;
+}
+.tn-vertical .tn-strip {
+    flex-direction: column;
+    align-items: stretch;
+    width: 48px;
+    border-right: 1px solid var(--tn-border);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ---------- tabs ---------- */
+.tn-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--tn-muted);
+    background: color-mix(in srgb, var(--tn-color) 12%, transparent);
+    border: 1px solid transparent;
+    transition: background-color 120ms, color 120ms;
+}
+.tn-tab:hover { color: var(--tn-fg); background: color-mix(in srgb, var(--tn-color) 24%, transparent); }
+.tn-tab:focus-visible { outline: 2px solid var(--tn-color); outline-offset: 1px; }
+.tn-tab.is-active {
+    color: var(--tn-fg);
+    background: color-mix(in srgb, var(--tn-color) 32%, var(--tn-bg));
+    border-color: color-mix(in srgb, var(--tn-color) 60%, transparent);
+}
+.tn-tab.is-dragging { opacity: 0.4; }
+
+/* horizontal: title + colour bar along the top */
+.tn-horizontal .tn-tab {
+    padding: 4px 10px 4px;
+    border-radius: 5px 5px 2px 2px;
+    border-top: 3px solid var(--tn-color);
+    max-width: 180px;
+}
+.tn-horizontal .tn-tab .tn-icon { display: none; }
+.tn-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tn-title.is-editing {
+    overflow: visible;
+    text-overflow: clip;
+    outline: 1px solid var(--tn-color);
+    border-radius: 2px;
+    padding: 0 2px;
+    cursor: text;
+    user-select: text;
+    min-width: 2em;
+}
+
+/* vertical: icon tile + colour bar along the left */
+.tn-vertical .tn-tab {
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+    border-radius: 2px 6px 6px 2px;
+    border-left: 3px solid var(--tn-color);
+    font-size: 17px;
+}
+.tn-vertical .tn-tab .tn-title { display: none; }
+
+.tn-md-badge {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 3px;
+    border-radius: 3px;
+    color: var(--tn-bg);
+    background: var(--tn-color);
+    opacity: 0.85;
+}
+.tn-vertical .tn-md-badge { position: absolute; right: 1px; bottom: 1px; font-size: 8px; padding: 1px 2px; }
+/* default text output tab: outlined, so it reads differently from the type badges */
+.tn-out-badge {
+    color: var(--tn-color);
+    background: none;
+    border: 1px solid var(--tn-color);
+    padding: 1px 3px;
+    opacity: 1;
+}
+.tn-vertical .tn-out-badge { top: 1px; bottom: auto; padding: 0 2px; }
+
+/* drop indicators */
+.tn-horizontal .tn-tab.drop-before { box-shadow: -3px 0 0 var(--tn-fg); }
+.tn-horizontal .tn-tab.drop-after  { box-shadow:  3px 0 0 var(--tn-fg); }
+.tn-vertical .tn-tab.drop-before   { box-shadow: 0 -3px 0 var(--tn-fg); }
+.tn-vertical .tn-tab.drop-after    { box-shadow: 0  3px 0 var(--tn-fg); }
+
+/* ---------- groups ---------- */
+.tn-group {
+    display: flex;
+    gap: 3px;
+    padding: 2px;
+    border-radius: 6px;
+    border: 1px dashed color-mix(in srgb, var(--tn-color) 55%, transparent);
+    background: color-mix(in srgb, var(--tn-color) 6%, transparent);
+}
+.tn-horizontal .tn-group { align-items: flex-end; }
+.tn-vertical .tn-group { flex-direction: column; align-items: stretch; }
+.tn-group.is-collapsed { border-style: solid; }
+.tn-group.has-active { border-color: var(--tn-color); }
+
+.tn-group-tabs { display: flex; gap: 3px; }
+.tn-horizontal .tn-group-tabs { flex-wrap: wrap; align-items: flex-end; }
+.tn-vertical .tn-group-tabs { flex-direction: column; }
+
+.tn-group-head {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--tn-color);
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 6px;
+    white-space: nowrap;
+}
+.tn-group-head:hover, .tn-group-head.is-drop { background: color-mix(in srgb, var(--tn-color) 20%, transparent); }
+.tn-group-head:focus-visible { outline: 2px solid var(--tn-color); }
+.tn-vertical .tn-group-head { justify-content: center; padding: 3px 0; gap: 1px; }
+.tn-chev { font-size: 9px; }
+.tn-group-count {
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 8px;
+    color: var(--tn-bg);
+    background: var(--tn-color);
+}
+.tn-vertical .tn-group-count { display: none; }
+
+/* ---------- tool buttons ---------- */
+.tn-tools { display: flex; gap: 2px; margin-left: auto; align-self: center; }
+.tn-vertical .tn-tools { flex-direction: column; margin: auto 0 0; align-items: center; }
+.tn-tool {
+    width: 26px;
+    height: 24px;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--tn-muted);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.tn-tool:hover { color: var(--tn-fg); border-color: var(--tn-border); }
+
+/* ---------- body ---------- */
+.tn-body {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    position: relative;
+}
+.tn-horizontal .tn-body { box-shadow: inset 0 2px 0 var(--tn-color); }
+.tn-vertical .tn-body { box-shadow: inset 2px 0 0 var(--tn-color); }
+
+.tn-text {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 10px 12px;
+    color: var(--tn-fg);
+    background: transparent;
+    font: 13px/1.5 ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+.tn-text::placeholder, .tn-placeholder { color: var(--tn-muted); font-style: italic; }
+
+.tn-empty {
+    margin: auto;
+    font: inherit;
+    color: var(--tn-muted);
+    background: none;
+    border: 1px dashed var(--tn-border);
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+.tn-empty:hover { color: var(--tn-fg); }
+
+/* ---------- rendered markdown ---------- */
+.tn-md {
+    flex: 1;
+    overflow: auto;
+    padding: 8px 14px;
+    cursor: default;
+    user-select: text;
+    word-wrap: break-word;
+}
+.tn-md > :first-child { margin-top: 4px; }
+.tn-md h1, .tn-md h2, .tn-md h3, .tn-md h4 { margin: 0.9em 0 0.4em; line-height: 1.25; }
+.tn-md h1 { font-size: 1.5em; }
+.tn-md h2 { font-size: 1.3em; }
+.tn-md h3 { font-size: 1.12em; }
+.tn-md p, .tn-md ul, .tn-md ol, .tn-md blockquote, .tn-md pre, .tn-md table { margin: 0 0 0.7em; }
+.tn-md ul, .tn-md ol { padding-left: 1.4em; }
+.tn-md a { color: var(--tn-color); }
+.tn-md code {
+    font: 0.92em ui-monospace, Consolas, monospace;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--tn-panel);
+}
+.tn-md pre { padding: 8px 10px; border-radius: 5px; background: var(--tn-panel); overflow-x: auto; }
+.tn-md pre code { padding: 0; background: none; }
+.tn-md blockquote { padding-left: 10px; border-left: 3px solid var(--tn-color); color: var(--tn-muted); }
+.tn-md hr { border: none; border-top: 1px solid var(--tn-border); }
+.tn-md table { border-collapse: collapse; display: block; overflow-x: auto; }
+.tn-md th, .tn-md td { border: 1px solid var(--tn-border); padding: 3px 8px; }
+.tn-md img { max-width: 100%; }
+.tn-md input[type="checkbox"] { margin-right: 4px; }
+.tn-md-fallback { white-space: pre-wrap; font: inherit; margin: 0; }
+
+/* ---------- floating menu ---------- */
+.tn-menu {
+    --tn-bg: var(--comfy-input-bg, #222);
+    --tn-panel: var(--comfy-menu-bg, #353535);
+    --tn-fg: var(--input-text, #ddd);
+    --tn-muted: var(--descrip-text, #999);
+    --tn-border: var(--border-color, #4e4e4e);
+    --tn-color: #4a90d9;
+    position: fixed;
+    z-index: 10000;
+    min-width: 190px;
+    max-width: 260px;
+    padding: 4px;
+    color: var(--tn-fg);
+    background: var(--tn-panel);
+    border: 1px solid var(--tn-border);
+    border-top: 3px solid var(--tn-color);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.tn-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 5px 8px;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.tn-menu-item:hover:not(:disabled), .tn-menu-item:focus-visible { background: color-mix(in srgb, var(--tn-color) 22%, transparent); outline: none; }
+.tn-menu-item:disabled { opacity: 0.4; cursor: default; }
+.tn-menu-item.is-danger { color: #e0776a; }
+.tn-check { width: 12px; flex-shrink: 0; color: var(--tn-color); }
+.tn-menu-sep { height: 1px; margin: 4px 2px; background: var(--tn-border); }
+
+.tn-swatches { display: flex; flex-wrap: wrap; gap: 5px; padding: 6px 8px; }
+.tn-swatch {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+.tn-swatch.is-current { border-color: var(--tn-fg); }
+.tn-swatch:hover { transform: scale(1.12); }
+.tn-swatch-custom {
+    position: relative;
+    overflow: hidden;
+    background: conic-gradient(#d05a4a, #d4a23c, #4fae78, #39acb0, #4a90d9, #9a6bd6, #d05a4a);
+}
+.tn-swatch-custom input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.tn-icons { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 4px; }
+.tn-icon-btn {
+    font-size: 17px;
+    height: 30px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.tn-icon-btn:hover { background: color-mix(in srgb, var(--tn-color) 20%, transparent); }
+.tn-icon-btn.is-current { border-color: var(--tn-color); }
+
+.tn-menu-input {
+    width: calc(100% - 8px);
+    margin: 4px;
+    padding: 5px 7px;
+    font: inherit;
+    color: var(--tn-fg);
+    background: var(--tn-bg);
+    border: 1px solid var(--tn-border);
+    border-radius: 4px;
+    outline: none;
+}
+.tn-menu-input:focus { border-color: var(--tn-color); }
+
+/* submenu items: current value on the right, then an arrow */
+.tn-menu-label { flex: 1; }
+.tn-menu-hint { color: var(--tn-muted); font-size: 11.5px; }
+.tn-menu-arrow { color: var(--tn-muted); font-size: 10px; }
+.tn-menu-item.has-sub:hover .tn-menu-arrow { color: var(--tn-fg); }
+.tn-submenu { min-width: 150px; }
+
+/* ---------- tag lists ---------- */
+.tn-tags {
+    flex: 1;
+    overflow: auto;
+    padding: 8px 12px 12px;
+    user-select: none;
+}
+.tn-head + .tn-head { margin-top: 10px; }
+.tn-head-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 3px 4px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    color: var(--tn-fg);
+    background: none;
+    border: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--tn-color) 45%, transparent);
+    border-radius: 3px 3px 0 0;
+    cursor: pointer;
+}
+.tn-head-title:hover { background: color-mix(in srgb, var(--tn-color) 12%, transparent); }
+.tn-head-title .tn-chev { color: var(--tn-color); width: 10px; }
+.tn-head.is-collapsed .tn-head-title { border-bottom-style: dashed; }
+
+.tn-sub-title {
+    position: relative;
+    display: inline-block;
+    margin: 8px 0 4px;
+    padding: 1px 6px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tn-color);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: copy;
+}
+.tn-sub-title:hover:not(:disabled) { border-color: color-mix(in srgb, var(--tn-color) 50%, transparent); }
+.tn-sub-title:disabled { color: var(--tn-muted); cursor: default; }
+
+.tn-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 2px; }
+.tn-sub-title + .tn-chips { margin-top: 0; }
+.tn-chip {
+    position: relative;
+    max-width: 100%;
+    padding: 3px 9px;
+    font: inherit;
+    font-size: 12.5px;
+    line-height: 1.3;
+    text-align: left;
+    overflow-wrap: anywhere;
+    color: var(--tn-fg);
+    background: color-mix(in srgb, var(--tn-color) 16%, var(--tn-bg));
+    border: 1px solid color-mix(in srgb, var(--tn-color) 40%, transparent);
+    border-radius: 12px;
+    cursor: copy;
+    /* fade out gently; the highlighted states below fade in a little faster */
+    transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+.tn-chip:hover { background: color-mix(in srgb, var(--tn-color) 30%, var(--tn-bg)); }
+.tn-chip:focus-visible, .tn-sub-title:focus-visible, .tn-head-title:focus-visible {
+    outline: 2px solid var(--tn-color);
+    outline-offset: 1px;
+}
+
+/* Highlight: Shift-click selection (stays while Shift is held) and chips lit by a
+   sub headline copy. Same look, so "what's being copied" always reads the same way. */
+.tn-chip.is-selected, .tn-chip.is-lit {
+    color: var(--tn-bg);
+    background: var(--tn-color);
+    border-color: var(--tn-color);
+    transition-duration: 0.18s;
+}
+
+/* "Copied" covers the element instead of replacing its text, so nothing shifts.
+   It is always there but transparent, so it can fade in and out. */
+.tn-chip::after, .tn-sub-title::after {
+    content: attr(data-copied);
+    position: absolute;
+    inset: -1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--tn-bg);
+    background: var(--tn-color);
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+.tn-chip.is-copied::after, .tn-sub-title.is-copied::after {
+    opacity: 1;
+    transition-duration: 0.18s;
+}
+
+/* a small dot marks tags that have a description */
+.tn-chip.has-desc { padding-right: 15px; }
+.tn-chip-dot {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 5px;
+    height: 5px;
+    margin-top: -2.5px;
+    border-radius: 50%;
+    background: var(--tn-color);
+    pointer-events: none;
+}
+.tn-chip.is-selected .tn-chip-dot, .tn-chip.is-lit .tn-chip-dot { background: var(--tn-bg); }
+
+/* description tooltip: lives on document.body, shown straight away */
+.tn-tip {
+    --tn-color: #4a90d9;
+    position: fixed;
+    z-index: 10001;
+    max-width: 280px;
+    padding: 6px 9px;
+    font: 12.5px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--input-text, #ddd);
+    background: var(--comfy-menu-bg, #353535);
+    border: 1px solid var(--border-color, #4e4e4e);
+    border-left: 3px solid var(--tn-color);
+    border-radius: 5px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    overflow-wrap: anywhere;
+}
+
+/* empty markdown and tag list tabs: a greyed example of how to write one */
+.tn-empty-view { cursor: default; }
+.tn-example {
+    margin: 4px 0 0;
+    padding: 8px 10px;
+    font: 12.5px/1.55 ui-monospace, "Cascadia Code", Consolas, monospace;
+    white-space: pre-wrap;
+    color: var(--tn-muted);
+    background: color-mix(in srgb, var(--tn-color) 6%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--tn-color) 35%, transparent);
+    border-radius: 5px;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tn-tab, .tn-swatch, .tn-chip, .tn-chip::after, .tn-sub-title::after { transition: none; }
+    .tn-swatch:hover { transform: none; }
+}

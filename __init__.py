@@ -6,6 +6,10 @@ NODE_CLASS_MAPPINGS / NODE_DISPLAY_NAME_MAPPINGS, and exposes the combined
 mappings for ComfyUI to load. Drop new node files in this folder and they
 register automatically — no need to edit this file.
 
+Front-end JavaScript is served from the ./web subfolder (see WEB_DIRECTORY at
+the bottom). Drop any node's .js in ./web and ComfyUI loads it automatically —
+again, no need to edit this file.
+
 Handles module filenames that aren't valid Python identifiers (e.g.
 "sigmas-at-percent.py") because importlib imports by string name.
 """
@@ -42,4 +46,8 @@ for _finder, module_name, _ispkg in pkgutil.iter_modules(__path__):
 print(f"[custom_nodes] Loaded {len(NODE_CLASS_MAPPINGS)} node(s): "
       f"{', '.join(sorted(NODE_CLASS_MAPPINGS)) or '(none)'}")
 
-__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
+# Serve front-end extensions from ./web. ComfyUI auto-loads every .js file it
+# finds there, so this line covers all current and future nodes in this package.
+WEB_DIRECTORY = "./web"
+
+__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
