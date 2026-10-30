@@ -94,15 +94,19 @@ async function copyText(text) {
         await navigator.clipboard.writeText(text);
         return true;
     } catch {
-        // Clipboard API needs a secure context (localhost or https). Fall back for LAN access.
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
-        document.body.append(ta);
-        ta.select();
+        // The Clipboard API needs a secure context (localhost or https), so this fallback covers
+        // ComfyUI opened over plain http from another machine. It fills in the browser's own copy
+        // event instead of selecting text in a hidden box: selecting would move focus, which
+        // closed the editor when a double-click on a tag copied it and opened the editor at once.
         let ok = false;
-        try { ok = document.execCommand("copy"); } catch { ok = false; }
-        ta.remove();
+        const onCopy = (e) => {
+            e.clipboardData.setData("text/plain", text);
+            e.preventDefault();
+            ok = true;
+        };
+        document.addEventListener("copy", onCopy, true);
+        try { document.execCommand("copy"); } catch { /* ok stays false */ }
+        document.removeEventListener("copy", onCopy, true);
         return ok;
     }
 }
@@ -119,31 +123,50 @@ function parseTagLine(line) {
     return { text: line.slice(0, i).trim(), desc: line.slice(i + DESC_SEP.length).trim() };
 }
 
+// Every headline, sub headline and tag records the line it came from (`line`), and headlines and
+// sub headlines record where their section ends (`end`, exclusive), so they can be moved by
+// moving lines of text.
 function parseTags(src) {
     const heads = [];
     let head = null;
     let sub = null;
+    const lines = String(src ?? "").split("\n");
     const ensureHead = () => {
-        if (!head) { head = { title: null, chips: [], subs: [] }; heads.push(head); }
+        if (!head) { head = { title: null, line: 0, chips: [], subs: [] }; heads.push(head); }
         return head;
     };
-    for (const raw of String(src ?? "").split("\n")) {
+    lines.forEach((raw, i) => {
         const line = raw.trim();
-        if (!line) continue;
+        if (!line) return;
         let m;
         if ((m = line.match(/^#(?!#)\s*(.*)$/))) {
-            head = { title: m[1].trim(), chips: [], subs: [] };
+            head = { title: m[1].trim(), line: i, chips: [], subs: [] };
             heads.push(head);
             sub = null;
         } else if ((m = line.match(/^#{2,}\s*(.*)$/))) {
-            sub = { title: m[1].trim(), chips: [] };
+            sub = { title: m[1].trim(), line: i, chips: [] };
             ensureHead().subs.push(sub);
         } else {
             const chip = parseTagLine(line);
+            chip.line = i;
             if (chip.text) (sub ?? ensureHead()).chips.push(chip);
         }
-    }
+    });
+    heads.forEach((hd, i) => {
+        hd.end = heads[i + 1]?.line ?? lines.length;
+        hd.subs.forEach((sb, j) => { sb.end = hd.subs[j + 1]?.line ?? hd.end; });
+    });
     return heads;
+}
+
+// Move `count` lines starting at `from` so they sit before line `to` (indices in the original
+// text). Returns the new text, or null when nothing would change.
+function moveLines(src, from, count, to) {
+    if (to >= from && to <= from + count) return null;
+    const lines = String(src).split("\n");
+    const block = lines.splice(from, count);
+    lines.splice(to > from ? to - count : to, 0, ...block);
+    return lines.join("\n");
 }
 
 // Tag lists saved before version 3 put several tags on a line, separated by commas.
@@ -159,13 +182,15 @@ function splitCommaLines(src) {
 // ---------- Shift-click selection ----------
 // Only one note holds a selection at a time. It lasts while Shift is held down.
 let selOwner = null;
-function endSelection() {
-    selOwner?.clearSelection();
+// flash: Shift let go (or window left) confirms the copy. Other endings (a plain click, a sub
+// headline click, editing) replace the clipboard, so the old selection just fades without "Copied".
+function endSelection(flash = false) {
+    selOwner?.clearSelection(flash);
     selOwner = null;
 }
-addEventListener("keyup", (e) => { if (e.key === "Shift") endSelection(); }, true);
+addEventListener("keyup", (e) => { if (e.key === "Shift") endSelection(true); }, true);
 // Shift released in another window never reaches this page, so leaving the window ends it too.
-addEventListener("blur", endSelection);
+addEventListener("blur", () => endSelection(true));
 
 // Tags can be written with spaces or underscores; the tab's "Use underscores" option decides.
 // On: spaces become underscores. Off: underscores become spaces, except in emoticon tags such
@@ -177,6 +202,16 @@ function chipText(tab, chip) {
     return isEmoticon(t) ? t : t.replace(/_+/g, " ");
 }
 const copyFormat = (tab, text) => (tab.copyComma ? text + "," : text);
+
+// Flash "Copied" (or "Copy failed") over each element, fading in and back out.
+function flashCopied(els, ok) {
+    for (const x of els) {
+        x.dataset.copied = ok ? "Copied" : "Copy failed";
+        x.classList.add("is-copied");
+        clearTimeout(x.tnTimer);
+        x.tnTimer = setTimeout(() => x.classList.remove("is-copied"), 900);
+    }
+}
 
 // ---------- examples shown in empty tabs ----------
 const EXAMPLES = {
@@ -349,6 +384,7 @@ function placeMenu(m, x, y) {
  *   { label, action, checked, danger, disabled, hint }
  *   { label, submenu: () => items }      flyout opened on hover or click
  *   { sep: true }
+ *   { heading: text }                    a title line, not clickable
  *   { swatches: current, onPick(color) }
  *   { icons: current, onPick(icon) }
  *   { input: value, placeholder, onSubmit(value) }
@@ -362,6 +398,8 @@ function buildMenu(items, accent, isSub) {
     for (const it of items) {
         if (it.sep) {
             m.append(h("div", "tn-menu-sep"));
+        } else if (it.heading !== undefined) {
+            m.append(h("div", "tn-menu-heading", { text: it.heading }));
         } else if (it.swatches !== undefined) {
             const row = h("div", "tn-swatches");
             for (const c of PALETTE) {
@@ -449,6 +487,24 @@ function showMenu(x, y, items, accent) {
 // so a bubbling listener would never hear Esc while focus is inside the note.
 addEventListener("keydown", (e) => { if (e.key === "Escape" && openMenu) closeMenu(); }, true);
 
+// Mouse wheel over something in a note that has more to scroll (a long tag list, markdown note,
+// text or tab strip) scrolls it. In Nodes 2.0 the canvas catches every wheel on its way down to
+// the node and zooms instead, so this listens at the window, before the canvas. Nothing is
+// prevented, so the browser scrolls as normal. Ctrl+wheel still zooms, and a note with nothing
+// to scroll leaves the wheel to the canvas.
+addEventListener("wheel", (e) => {
+    if (e.ctrlKey || e.metaKey) return;
+    const root = e.target?.closest?.(".tn-root");
+    if (!root) return;
+    for (let el = e.target; el && root.contains(el); el = el.parentElement) {
+        const oy = getComputedStyle(el).overflowY;
+        if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight + 1) {
+            e.stopPropagation();
+            return;
+        }
+    }
+}, { capture: true, passive: true });
+
 // ---------- UI controller ----------
 class TabbedNoteUI {
     constructor(node) {
@@ -462,6 +518,15 @@ class TabbedNoteUI {
         this.body = h("div", "tn-body");
         this.root.append(this.strip, this.body);
         this.root.addEventListener("keydown", stopKeys);
+        // Focus rings only for keyboard use: mouse clicks hide them, the Tab key brings them back.
+        this.root.dataset.input = "pointer";
+        this.root.addEventListener("pointerdown", () => { this.root.dataset.input = "pointer"; }, true);
+        this.root.addEventListener("keydown", (e) => { if (e.key === "Tab") this.root.dataset.input = "keyboard"; }, true);
+        // Right-clicking where you type must reach the browser, so its menu (with spelling
+        // suggestions) opens. In Nodes 2.0 the node would otherwise take it for its own menu.
+        this.root.addEventListener("contextmenu", (e) => {
+            if (e.target.closest?.("textarea, input, [contenteditable=true]")) e.stopPropagation();
+        });
         // Dropping on empty strip space: ungroup and move to the end.
         this.strip.addEventListener("dragover", (e) => { if (this.dragId) e.preventDefault(); });
         this.strip.addEventListener("drop", (e) => {
@@ -556,6 +621,7 @@ class TabbedNoteUI {
             draggable: "true", role: "tab", tabindex: "0", title: tab.title,
         });
         el.style.setProperty("--tn-color", tab.color);
+        el.dataset.id = tab.id;
         el.append(h("span", "tn-icon", { text: tab.icon }));
         const title = h("span", "tn-title", { text: tab.title });
         el.append(title);
@@ -567,11 +633,18 @@ class TabbedNoteUI {
 
         el.addEventListener("click", () => this.activate(tab.id));
         el.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target === el) this.activate(tab.id); });
+        // Double-click renames, with the whole name selected so typing replaces it. Vertical tabs
+        // show no name, so a rename box opens instead (the icon picker is in the right-click menu).
         el.addEventListener("dblclick", (e) => {
-            if (this.vertical) this.iconMenu(e, tab);
+            e.stopPropagation(); // in Nodes 2.0, a double-click must not reach the node
+            if (this.vertical) this.renameMenu(e, tab.title, (v) => { if (v) { tab.title = v; this.commit(); } });
             else this.renameInline(tab, title);
         });
-        el.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); this.tabMenu(e, tab); });
+        el.addEventListener("contextmenu", (e) => {
+            // While renaming, right-click belongs to the browser (spelling suggestions).
+            if (title.isContentEditable) { e.stopPropagation(); return; }
+            e.preventDefault(); e.stopPropagation(); this.tabMenu(e, tab);
+        });
 
         // drag to reorder / regroup
         el.addEventListener("dragstart", (e) => {
@@ -664,6 +737,8 @@ class TabbedNoteUI {
                 const shown = chipText(tab, c);
                 const key = `${prefix}.${ci}`;
                 const chip = h("button", "tn-chip" + (selected.has(key) ? " is-selected" : ""), { text: shown });
+                chip.dataset.drag = "chip";
+                chip.dataset.key = key;
                 if (c.desc) {
                     chip.classList.add("has-desc");
                     chip.setAttribute("aria-description", c.desc);
@@ -674,6 +749,7 @@ class TabbedNoteUI {
                     chip.addEventListener("blur", hideTip);
                 }
                 chip.addEventListener("click", (e) => {
+                    if (this.consumeDragClick()) return;
                     if (e.shiftKey) this.toggleSelected(tab, chip, key, shown);
                     else {
                         endSelection();
@@ -695,7 +771,10 @@ class TabbedNoteUI {
                     "aria-expanded": String(!collapsed),
                 });
                 hb.append(h("span", "tn-chev", { text: collapsed ? "▸" : "▾" }), h("span", "", { text: head.title || "Untitled" }));
+                hb.dataset.drag = "head";
+                hb.dataset.key = `${hi}`;
                 hb.addEventListener("click", () => {
+                    if (this.consumeDragClick()) return;
                     tab.collapsed = collapsed ? tab.collapsed.filter((k) => k !== key) : [...tab.collapsed, key];
                     this.changed();
                     this.renderBody();
@@ -705,21 +784,49 @@ class TabbedNoteUI {
             if (!collapsed) {
                 if (head.chips.length) sec.append(chipRow(head.chips, `${hi}.h`));
                 head.subs.forEach((sub, si) => {
+                    // A sub headline's section: a coloured bar down its left side, from the title
+                    // to its last tag. The arrow collapses it; clicking the name copies its tags.
+                    // Collapsed sub headlines are remembered by headline + sub headline name.
+                    const subKey = `## ${head.title ?? ""} / ${sub.title}`;
+                    const subCollapsed = tab.collapsed.includes(subKey);
+                    const box = h("div", "tn-sub" + (subCollapsed ? " is-collapsed" : ""));
+                    const bar = h("div", "tn-sub-row");
+                    const arrow = h("button", "tn-sub-chev", {
+                        text: subCollapsed ? "▸" : "▾",
+                        title: subCollapsed ? "Expand" : "Collapse",
+                        "aria-label": `${subCollapsed ? "Expand" : "Collapse"} ${sub.title || "Untitled"}`,
+                        "aria-expanded": String(!subCollapsed),
+                    });
+                    arrow.addEventListener("click", () => {
+                        tab.collapsed = subCollapsed ? tab.collapsed.filter((k) => k !== subKey) : [...tab.collapsed, subKey];
+                        this.changed();
+                        this.renderBody();
+                    });
                     const sb = h("button", "tn-sub-title", {
                         text: sub.title || "Untitled",
                         title: sub.chips.length ? "Click to copy all of these tags" : "No tags to copy",
                     });
-                    sec.append(sb);
+                    sb.dataset.drag = "sub";
+                    sb.dataset.key = `${hi}.${si}`;
+                    bar.append(arrow, sb);
+                    if (subCollapsed && sub.chips.length) bar.append(h("span", "tn-sub-count", { text: String(sub.chips.length) }));
+                    box.append(bar);
+                    sec.append(box);
                     if (sub.chips.length) {
                         const row = chipRow(sub.chips, `${hi}.${si}`);
                         const all = copyFormat(tab, sub.chips.map((c) => chipText(tab, c)).join(", "));
                         sb.addEventListener("click", () => {
+                            if (this.consumeDragClick()) return;
                             endSelection();
-                            this.copyWithFeedback(sb, all, [...row.children]);
+                            // When collapsed, the tags aren't on screen, so only the name flashes.
+                            this.copyWithFeedback(sb, all, subCollapsed ? [] : [...row.children]);
                         });
-                        sec.append(row);
+                        if (!subCollapsed) box.append(row);
                     } else {
-                        sb.disabled = true;
+                        // Not `disabled`: a disabled button gets no pointer events, and an empty sub
+                        // headline must still be draggable and a place to drop tags.
+                        sb.classList.add("is-empty");
+                        sb.setAttribute("aria-disabled", "true");
                     }
                 });
             } else {
@@ -727,18 +834,135 @@ class TabbedNoteUI {
             }
             view.append(sec);
         });
+        view.addEventListener("pointerdown", (e) => this.startTagDrag(e, tab, heads));
         return view;
+    }
+
+    // ----- Ctrl+drag to move tags, sub headlines and headlines -----
+    // What a [data-drag] element stands for, from its key ("hi", "hi.si", "hi.si.ci", "hi.h.ci").
+    dragItem(el, heads) {
+        const [hi, si, ci] = el.dataset.key.split(".");
+        const head = heads[+hi];
+        if (el.dataset.drag === "head") return { kind: "head", el, node: head, title: head.title };
+        if (el.dataset.drag === "sub") return { kind: "sub", el, node: head.subs[+si], head, title: head.subs[+si].title };
+        const owner = si === "h" ? head : head.subs[+si];
+        return { kind: "chip", el, node: owner.chips[+ci], owner, head };
+    }
+
+    // Where the dragged item would land if dropped at this pointer position: {el, side, at},
+    // where `at` is the line it would be inserted before.
+    dropTarget(ev, item, heads) {
+        const under = document.elementFromPoint(ev.clientX, ev.clientY)?.closest?.("[data-drag]");
+        if (!under || !this.body.contains(under) || under === item.el) return null;
+        const t = this.dragItem(under, heads);
+        const r = under.getBoundingClientRect();
+        const lower = ev.clientY > r.top + r.height / 2;
+        const lastLine = (n) => (n.chips.length ? n.chips[n.chips.length - 1].line : n.line) + 1;
+        if (item.kind === "chip") {
+            if (t.kind === "chip") {
+                const after = ev.clientX > r.left + r.width / 2;
+                return { el: under, side: after ? "after" : "before", at: t.node.line + (after ? 1 : 0) };
+            }
+            // Onto a title: go to the end of that title's own tags.
+            return { el: under, side: "into", at: lastLine(t.node) };
+        }
+        if (item.kind === "sub") {
+            if (t.kind === "sub") return { el: under, side: lower ? "below" : "above", at: lower ? t.node.end : t.node.line };
+            if (t.kind === "head") return { el: under, side: "into", at: t.node.end };
+            return null;
+        }
+        if (t.kind === "head") return { el: under, side: lower ? "below" : "above", at: lower ? t.node.end : t.node.line };
+        return null;
+    }
+
+    startTagDrag(e, tab, heads) {
+        if (!e.ctrlKey || e.button !== 0) return;
+        const src = e.target.closest?.("[data-drag]");
+        if (!src) return;
+        e.preventDefault();
+        e.stopPropagation(); // keep ComfyUI from treating this as a node or canvas drag
+        const item = this.dragItem(src, heads);
+        const start = [e.clientX, e.clientY];
+        let ghost = null;
+        let target = null;
+        const mark = (t) => {
+            target?.el.classList.remove("tn-drop-before", "tn-drop-after", "tn-drop-above", "tn-drop-below", "tn-drop-into");
+            target = t;
+            target?.el.classList.add(`tn-drop-${t.side}`);
+        };
+        const move = (ev) => {
+            ev.stopPropagation();
+            if (!ghost) {
+                if (Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) < 5) return;
+                endSelection();
+                hideTip();
+                ghost = h("div", "tn-ghost", { text: item.kind === "chip" ? src.textContent : item.title || "Untitled" });
+                ghost.style.setProperty("--tn-color", getComputedStyle(src).getPropertyValue("--tn-color"));
+                document.body.append(ghost);
+                src.classList.add("is-dragging");
+                this.root.classList.add("tn-is-dragging");
+            }
+            ghost.style.left = ev.clientX + 12 + "px";
+            ghost.style.top = ev.clientY + 10 + "px";
+            const t = this.dropTarget(ev, item, heads);
+            if (t?.el !== target?.el || t?.side !== target?.side) mark(t);
+        };
+        const finish = (ev, cancelled) => {
+            removeEventListener("pointermove", move, true);
+            removeEventListener("pointerup", up, true);
+            removeEventListener("pointercancel", cancel, true);
+            removeEventListener("keydown", esc, true);
+            if (!ghost) return; // no real drag: let the click happen as normal
+            ghost.remove();
+            src.classList.remove("is-dragging");
+            this.root.classList.remove("tn-is-dragging");
+            this.dragClick = true; // swallow the click that follows the pointerup
+            setTimeout(() => { this.dragClick = false; });
+            const t = target;
+            mark(null);
+            if (!cancelled && t) this.dropTagItem(tab, item, t, ev);
+        };
+        const up = (ev) => { ev.stopPropagation(); finish(ev, false); };
+        const cancel = (ev) => finish(ev, true);
+        const esc = (ev) => { if (ev.key === "Escape") { ev.stopPropagation(); finish(ev, true); } };
+        addEventListener("pointermove", move, true);
+        addEventListener("pointerup", up, true);
+        addEventListener("pointercancel", cancel, true);
+        addEventListener("keydown", esc, true);
+    }
+
+    consumeDragClick() {
+        const was = this.dragClick;
+        this.dragClick = false;
+        return was;
+    }
+
+    dropTagItem(tab, item, t, ev) {
+        const apply = (count) => {
+            const next = moveLines(tab.content, item.node.line, count, t.at);
+            if (next === null) return;
+            tab.content = next;
+            this.changed();
+            this.renderBody();
+        };
+        if (item.kind === "chip") { apply(1); return; }
+        // Headlines and sub headlines ask first: with everything under them, just the title, or cancel.
+        const name = item.title || "Untitled";
+        showMenu(ev.clientX, ev.clientY, [
+            { heading: `Move "${name}"` },
+            {
+                label: item.kind === "head" ? "With its sub headlines and tags" : "With its tags",
+                action: () => apply(item.node.end - item.node.line),
+            },
+            { label: item.kind === "head" ? "Just the headline" : "Just the sub headline", action: () => apply(1) },
+            { sep: true },
+            { label: "Cancel" },
+        ], getComputedStyle(item.el).getPropertyValue("--tn-color"));
     }
 
     // Plain click: flash "Copied" on the element (and light up `also`, e.g. a sub headline's chips).
     async copyWithFeedback(el, text, also = []) {
-        const ok = await copyText(text);
-        el.dataset.copied = ok ? "Copied" : "Copy failed";
-        for (const x of [el, ...also]) {
-            x.classList.add(x === el ? "is-copied" : "is-lit");
-            clearTimeout(x.tnTimer);
-            x.tnTimer = setTimeout(() => x.classList.remove("is-copied", "is-lit"), 900);
-        }
+        flashCopied([el, ...also], await copyText(text));
     }
 
     // Shift-click: add or remove a chip, then copy the whole selection in click order.
@@ -750,13 +974,20 @@ class TabbedNoteUI {
         if (i >= 0) this.sel.splice(i, 1);
         else this.sel.push({ key, text: shown });
         chip.classList.toggle("is-selected", i < 0);
-        if (this.sel.length) copyText(copyFormat(tab, this.sel.map((x) => x.text).join(", ")));
+        // Copy on every click so the clipboard always holds the selection; the "Copied"
+        // confirmation waits until Shift is let go (see clearSelection).
+        if (this.sel.length) this.selCopy = copyText(copyFormat(tab, this.sel.map((x) => x.text).join(", ")));
     }
 
-    clearSelection() {
+    // The selection ends. When it's confirmed (Shift let go), every picked chip flashes "Copied"
+    // together. Classes change in place rather than re-rendering, so it all fades.
+    async clearSelection(flash) {
+        const picked = [...this.body.querySelectorAll(".tn-chip.is-selected")];
+        const pending = this.selCopy;
         this.sel = [];
-        // Remove the class rather than re-rendering, so the highlights fade out.
-        for (const c of this.body.querySelectorAll(".tn-chip.is-selected")) c.classList.remove("is-selected");
+        this.selCopy = null;
+        for (const c of picked) c.classList.remove("is-selected");
+        if (flash && picked.length) flashCopied(picked, pending ? await pending : true);
     }
 
     editor(tab) {
@@ -813,10 +1044,17 @@ class TabbedNoteUI {
     }
 
     // ----- actions -----
+    // Switch tabs without rebuilding the tab strip. Rebuilding replaced the tab under the pointer
+    // between the two clicks of a double-click, so the browser never reported the double-click
+    // and renaming never opened.
     activate(id) {
-        this.s.active = id;
+        const s = this.s;
+        if (s.active === id) return;
+        s.active = id;
         this.editing = false;
-        this.commit();
+        for (const el of this.strip.querySelectorAll(".tn-tab")) el.classList.toggle("is-active", el.dataset.id === id);
+        this.changed();
+        this.renderBody();
     }
 
     addTab(group = null) {
@@ -968,6 +1206,9 @@ class TabbedNoteUI {
     }
 
     renameInline(tab, span) {
+        // While typing, clicks inside the name should place the cursor, not start dragging the tab.
+        const tabEl = span.closest(".tn-tab");
+        if (tabEl) tabEl.draggable = false;
         span.contentEditable = "true";
         span.classList.add("is-editing");
         span.focus();

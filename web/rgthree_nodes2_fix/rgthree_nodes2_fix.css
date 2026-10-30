@@ -1,0 +1,93 @@
+/* rgthree Nodes 2.0 fix (Personal QoL Nodes): Fast Groups Bypasser / Muter rows.
+   Colours come from ComfyUI's own theme variables so rows match Nodes 2.0 in light and dark. */
+
+.qol-rg-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 28px;
+  min-width: 0;
+  padding: 0 4px 0 10px;
+  border-radius: 8px;
+  background: var(--component-node-widget-background, #2a2a2e);
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.qol-rg-row:hover {
+  background: var(--component-node-widget-background-hovered, #34343a);
+}
+.qol-rg-row.is-on {
+  color: var(--component-node-foreground, #e6e6ea);
+}
+
+.qol-rg-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.qol-rg-state {
+  flex: none;
+  min-width: 2ch;
+  text-align: right;
+  opacity: 0.8;
+}
+
+/* Switch, styled like a Nodes 2.0 toggle. */
+.qol-rg-switch {
+  position: relative;
+  flex: none;
+  width: 28px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--component-node-widget-background-selected, #4a4a52);
+  transition: background-color 0.15s ease;
+}
+.qol-rg-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--component-node-foreground-secondary, #9a9aa2);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.qol-rg-row.is-on .qol-rg-switch {
+  background: var(--primary-background, #3b82f6);
+}
+.qol-rg-row.is-on .qol-rg-knob {
+  transform: translateX(12px);
+  background: #fff;
+}
+
+.qol-rg-nav {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-left: 1px solid var(--node-divider, rgba(255, 255, 255, 0.12));
+  border-radius: 0 6px 6px 0;
+  background: transparent;
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  cursor: pointer;
+}
+.qol-rg-nav:hover {
+  color: var(--component-node-foreground, #e6e6ea);
+  background: var(--component-node-widget-background-selected, #4a4a52);
+}
+.qol-rg-nav[hidden] {
+  display: none;
+}
