@@ -22,7 +22,6 @@ PS: Honestly I think I hyper-focused in on this one and created a monster, in a 
 Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.
 Note and Markdown notes work like stock, except, well in tabs.
 -  Tag list creates chips from your tags list which you just click on to copy, clicking a sub-headline—formatted while editing as '##sub-headline_name' —will copy all tags under the sub-headline, clicking on a chip will copy the clicked on chip, formatting guide in any empty markdown note or Tag list.
--  Plan to add shift+click to copy multiple tags as I forgot about that one. 
 -  You can colourised the the tabs, add tabs to groups, collapse the groups, and colourise groups.
 -  You can also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a tab to use as the output.
 -  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
@@ -30,6 +29,8 @@ Note and Markdown notes work like stock, except, well in tabs.
 The last 3 seem kinda gimmicky if you ask me, hence why it's berried in a settings menu you shouldn't really have to touch otherwise. 
 
 PS: Nice if you find yourself plastering a bunch of notes and markdown notes on your workflows and creating a mess, or if you are tired of arranging you literality of notes and markdown notes, also for Anima, illustrious and also maybe MOSS Image for keeping your go to danbooru tags organised.
+
+-  Plan to add shift+click to copy multiple tags as I forgot about that one. 
 
   Gets a lot less complicated, but much more boring and niche here for sure, so in order of least boring and niche.
 
