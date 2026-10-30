@@ -28,7 +28,7 @@ PS: I think I hyper-focused in on this one and created a monster, in a good way,
   A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
 Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.
 Note and Markdown notes work like stock, except, well in tabs.
--  Tag list creates chips from your tags list which you just click on to copy, clicking a sub-headline—formatted while editing as '##sub-headline_name' —will copy all tags under the sub-headline, clicking on a chip will copy the clicked on chip, formatting guide in any empty markdown note or Tag list.
+-  Tag list creates chips from your tags list which you just click on to copy, clicking a sub-headline—formatted while editing as `##sub-headline_name`—will copy all tags under the sub-headline, clicking on a chip will copy the clicked on chip, formatting guide in any empty markdown note or Tag list.
 -  Colourisable  the tabs, add tabs to groups, collapse the groups, and colourise groups.
 -  Also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a default tab to use as the output.
 -  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
