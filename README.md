@@ -50,6 +50,6 @@ Same as sigmas at step, but this time with percentages, actually less useful, bu
 ### Force Changed
 Useful when you have stateful nodes which don't reset on completion of the generation, literally the only reason for this node, but when it comes in handy it's so handy.
 
-All nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with Claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop, IT REFINED AI SLOP!
+*All nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with Claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop, IT'S REFINED AI SLOP!*
 
 
