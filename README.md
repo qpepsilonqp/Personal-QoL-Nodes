@@ -1,6 +1,6 @@
 Proper description with pretty pictures TBD.
 
-###Super-Power LoRA Loader:
+### Super-Power LoRA Loader:
   A loRA loader for crazy people with lots of loRAs to effectively manage their horde of loRAs. 
 Add individual LoRAs, folders or folder trees with an initial import menu, which can be accessed in setting after setup. 
 Imported folder trees duplicated in group trees where you can move about loras without changing the files location, new LoRAs added to a folder or folder tree will automatically be imported, and if a group exists with a matching folder location will get added to the group.
@@ -12,7 +12,7 @@ Group/List toggle: switch between grouped and flat list.
 
 PS: Honestly I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead.
 
-###TabbedNote:
+### TabbedNote:
   A tabbed note node... dur.
 Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.
 Note and Markdown notes work like stock, except, well in tabs.
@@ -27,20 +27,20 @@ PS: Nice if you find yourself plastering a bunch of notes and markdown notes on 
 
   Gets a lot less complicated, but much more boring and niche here for sure, so in order of least boring and niche.
 
-###Resolution Picker:
+### Resolution Picker:
   set megapixel, aspect ratio, orientation and divisible by, with live output resolution preview, there is a node out there that is basically this minus the orientation, but I find a separate orientation setting to be useful, allows for more aspect ratios in a shorter list.
 Included aspect ratios: 1:1, 5:4, 4:3, 1.414:1, 3:2, 5:3, 16:9, 2:1, 21:9, 2.39:1, 3:1.
 
-###Seed History: 
+### Seed History: 
 Find yourself realising you had a good seed but now you have lost it, feed your seed into this node and keep a history, so you never have to regret losing a seed again.
 
-###Sigmas at Step:
+### Sigmas at Step:
 Useful for nodes that use a sigmas value to activate or deactivate in an intuitive manner.
 
-###Sigmas at Percent:
+### Sigmas at Percent:
 Same as sigmas at step, but this time with percentages, actually less useful, but I created it so... why not add it, someone might find a use case where it's more useful.
 
-###Force Changed
+### Force Changed
 Useful when you have stateful nodes which don't reset on completion of the generation, literally the only reason for this node, but when it comes in handy it's so handy.
 
 
