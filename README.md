@@ -39,7 +39,7 @@ PS: Nice if you find yourself plastering a bunch of notes and markdown notes on 
 -Included aspect ratios: 1:1, 5:4, 4:3, 1.414:1, 3:2, 5:3, 16:9, 2:1, 21:9, 2.39:1, 3:1.
 
 ### Seed History: 
-Find yourself realising you had a good seed but now you have lost it, feed your seed into this node and keep a history, so you never have to regret losing a seed again.
+Find yourself realising you had a good seed, but now you have lost it, feed your seed into this node and keep a history, so you never have to regret losing a seed again.
 
 ### Sigmas at Step:
 Useful for nodes that use a sigmas value to activate or deactivate in an intuitive manner.
