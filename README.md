@@ -5,7 +5,7 @@ A loRA loader for crazy people with lots of loRAs, to effectively manage their h
   
 -  Add individual LoRAs, folders or folder trees with an initial import wizard, which can be accessed in setting after setup. 
 -  Imported folder trees duplicated in group trees.
--  You can move about loras without changing the files location.
+-  Move about loras in GROUPS without changing the files location.
 -  new LoRAs added to a folder or folder tree will automatically be imported after refreshing comfyUI or pressing the Rescan Folders button, if a group exists with a matching folder location will get added to the group.
 -  Search all imported loras or individual groups.
 -  Create Favourite and Mixes to more effectively switch between loras.
@@ -22,8 +22,8 @@ PS: Honestly I think I hyper-focused in on this one and created a monster, in a 
 Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.
 Note and Markdown notes work like stock, except, well in tabs.
 -  Tag list creates chips from your tags list which you just click on to copy, clicking a sub-headline—formatted while editing as '##sub-headline_name' —will copy all tags under the sub-headline, clicking on a chip will copy the clicked on chip, formatting guide in any empty markdown note or Tag list.
--  You can colourised the the tabs, add tabs to groups, collapse the groups, and colourise groups.
--  You can also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a tab to use as the output.
+-  Colourised the the tabs, add tabs to groups, collapse the groups, and colourise groups.
+-  Also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a default tab to use as the output.
 -  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
 
 The last 3 seem kinda gimmicky if you ask me, hence why it's berried in a settings menu you shouldn't really have to touch otherwise. 
@@ -32,7 +32,7 @@ PS: Nice if you find yourself plastering a bunch of notes and markdown notes on 
 
 -  Plan to add shift+click to copy multiple tags as I forgot about that one. 
 
-  Gets a lot less complicated, but much more boring and niche here for sure, so in order of least boring and niche.
+  *Gets a lot less complicated, but much more boring and niche here for sure, so in order of least boring and niche.*
 
 ### Resolution Picker:
   set megapixel, aspect ratio, orientation and divisible by, with live output resolution preview, there is a node out there that is basically this minus the orientation, but I find a separate orientation setting to be useful, allows for more aspect ratios in a shorter list.
@@ -48,8 +48,6 @@ Useful for nodes that use a sigmas value to activate or deactivate in an intuiti
 Same as sigmas at step, but this time with percentages, actually less useful, but I created it so... why not add it, someone might find a use case where it's more useful.
 
 ### Force Changed
-Useful when you have stateful nodes which don't reset on completion of the generation, literally the only reason for this node, but when it comes in handy it's so handy.
+Useful when you have stateful nodes which don't reset on completion of the generation, literally the only reason for this node, but when it comes in handy, it's so handy. Just wire it in before the stateful node and it will registerer the text or seed change and force an is_changed for everything after the node.
 
-*All nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with Claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop, IT'S REFINED AI SLOP, DAMMIT!*
-
-
+*All nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with Claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop. IT'S REFINED AI SLOP, DAMMIT!*
