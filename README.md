@@ -1,7 +1,7 @@
 Proper description with pretty pictures TBD.
 
 ### Super-Power LoRA Loader:
-A loRA loader for crazy people with lots of loRAs to effectively manage their horde of loRAs. 
+A loRA loader for crazy people with lots of loRAs to effectively manage their horde of loRAs, *still in beta so some things may change, but it should be just how functions are displayed rather than any any fictionality additions or changes, feel free to throw in your 2 cents.* 
   
 -  Add individual LoRAs, folders or folder trees with an initial import menu, which can be accessed in setting after setup. 
 -  Imported folder trees duplicated in group trees where you can move about loras without changing the files location, new LoRAs added to a folder or folder tree will automatically be imported after refreshing comfyUI or pressing the Rescan Folders button, and if a group exists with a matching folder location will get added to the group.
@@ -14,7 +14,7 @@ A loRA loader for crazy people with lots of loRAs to effectively manage their ho
 PS: Honestly I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead.
 
 ### TabbedNote:
-  A tabbed note node... dur.
+  A tabbed note node... dur, *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
 Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.
 Note and Markdown notes work like stock, except, well in tabs.
 -  Tag list creates chips from your tags list which you just click on to copy, clicking a sub-headline—formatted while editing as '##sub-headline_name' —will copy all tags under the sub-headline, clicking on a chip will copy the clicked on chip, formatting guide in any empty markdown note or Tag list.
