@@ -1,5 +1,10 @@
 Proper description with pretty pictures TBD.
 
+### Nodes 2.0 front-end fix for rgthree-comfy.
+-  currently only Fast Node Bypass and Mute are fixed.
+-  Next is Seed and Label.
+-  each part toggleable in ComfyUI setting encase the fix breaks.
+
 ### Super-Power LoRA Loader:
 A loRA loader for crazy people with lots of loRAs, to effectively manage their horde of loRAs. *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
   
@@ -22,7 +27,7 @@ PS: I think I hyper-focused in on this one and created a monster, in a good way,
 Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.
 Note and Markdown notes work like stock, except, well in tabs.
 -  Tag list creates chips from your tags list which you just click on to copy, clicking a sub-headline—formatted while editing as '##sub-headline_name' —will copy all tags under the sub-headline, clicking on a chip will copy the clicked on chip, formatting guide in any empty markdown note or Tag list.
--  Colourised the the tabs, add tabs to groups, collapse the groups, and colourise groups.
+-  Colourisable  the tabs, add tabs to groups, collapse the groups, and colourise groups.
 -  Also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a default tab to use as the output.
 -  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
 
@@ -51,5 +56,3 @@ Same as sigmas at step, but this time with percentages, actually less useful, bu
 Useful when you have stateful nodes which don't reset on completion of the generation, literally the only reason for this node, but when it comes in handy, it's so handy. Just wire it in before the stateful node and it will registerer the text or seed change and force an is_changed for everything after the node.
 
 *All nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with Claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop. IT'S REFINED AI SLOP, DAMMIT!*
-
-*Also had Claude write a Spec and after action report for both tabbednote and SuperPowerLoraLoader, handing over those files as well as the repo to a competent chat bot with access to VMs should enable you to effectively edit the nodes yourself if you want, the code base isn't big so it should only take like ~20 minutes, most of which will be it checking it didn't break anything.*
