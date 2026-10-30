@@ -1,4 +1,4 @@
-Proper description with pretty pictures TBD, nodes made with Claude so if you don't like AI, it's fine, just don't use it.
+Proper description with pretty pictures TBD, nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop.
 
 ### Super-Power LoRA Loader:
 A loRA loader for crazy people with lots of loRAs to effectively manage their horde of loRAs, *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
