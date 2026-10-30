@@ -15,7 +15,7 @@ A loRA loader for crazy people with lots of loRAs, to effectively manage their h
 -  A fair amount of customisation available most of which can be changed from the setting. 
 -  Group/List toggle: switch between grouped and flat list.
 
-PS: Honestly I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much, as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead, which was my go to before—hence the name—but gets way too unwieldy when working with a more than I would say 15+ loras.
+PS: I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much, as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead, which was my go to before—hence the name—but gets way too unwieldy when working with a more than I would say 15+ loras.
 
 ### TabbedNote:
   A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
@@ -26,7 +26,7 @@ Note and Markdown notes work like stock, except, well in tabs.
 -  Also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a default tab to use as the output.
 -  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
 
-The last 3 seem kinda gimmicky if you ask me, hence why it's berried in a settings menu you shouldn't really have to touch otherwise. 
+The last 2 seem kinda gimmicky if you ask me, hence why it's berried in a settings menu you shouldn't really have to touch otherwise. 
 
 PS: Nice if you find yourself plastering a bunch of notes and markdown notes on your workflows and creating a mess, or if you are tired of arranging you literality of notes and markdown notes, also for Anima, illustrious and also maybe MOSS Image for keeping your go to danbooru tags organised.
 
