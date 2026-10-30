@@ -1,4 +1,4 @@
-Proper description with pretty pictures TBD.
+Proper description with pretty pictures TBD, made with Claude so if you don't like AI, it's fine just don't use it.
 
 ### Super-Power LoRA Loader:
 A loRA loader for crazy people with lots of loRAs to effectively manage their horde of loRAs, *still in beta so some things may change, but it should be just how functions are displayed rather than any any fictionality additions or changes, feel free to throw in your 2 cents.* 
