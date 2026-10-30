@@ -3,7 +3,7 @@ Proper description with pretty pictures TBD.
 ### Nodes 2.0 front-end fix for rgthree-comfy.
 -  currently only Fast Node Bypass and Mute are fixed.
 -  Next is Seed and Label.
--  each part toggleable in ComfyUI setting encase the fix breaks.
+-  each part toggleable in ComfyUI settings encase the fix breaks.
 
 This is only a fix you must install rgthree-comfy separately.
  
