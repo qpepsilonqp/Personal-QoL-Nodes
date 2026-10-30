@@ -4,7 +4,7 @@ Proper description with pretty pictures TBD.
 A loRA loader for crazy people with lots of loRAs to effectively manage their horde of loRAs. 
   
 -  Add individual LoRAs, folders or folder trees with an initial import menu, which can be accessed in setting after setup. 
--  Imported folder trees duplicated in group trees where you can move about loras without changing the files location, new LoRAs added to a folder or folder tree will automatically be imported, and if a group exists with a matching folder location will get added to the group.
+-  Imported folder trees duplicated in group trees where you can move about loras without changing the files location, new LoRAs added to a folder or folder tree will automatically be imported after refreshing comfyUI or pressing the Rescan Folders button, and if a group exists with a matching folder location will get added to the group.
 -  Search all imported loras or individual groups.
 -  Create Favourite and Mixes to more effectively switch between loras.
 -  Automagically condenses down if you make make the node narrow, collapse the groups section to make it even smaller to fit into how you want it to fit in with your workflow.
