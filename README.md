@@ -11,7 +11,7 @@ A loRA loader for crazy people with lots of loRAs to effectively manage their ho
 -  A fair amount of customisation available most of which can be changed from the setting. 
 -  Group/List toggle: switch between grouped and flat list.
 
-PS: Honestly I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead, which was my go to before—hence the name—but gets way too unwieldy when working with a more than I would say 15+ loras.
+PS: Honestly I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much, as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead, which was my go to before—hence the name—but gets way too unwieldy when working with a more than I would say 15+ loras.
 
 ### TabbedNote:
   A tabbed note node... dur, *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
