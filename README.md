@@ -5,7 +5,7 @@ Proper description with pretty pictures TBD.
 -  Next is Seed and Label.
 -  each part togglable in ComfyUI settings encase the fix breaks.
 
-This is only a front-end patch, you must install rgthree-comfy separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and web/rgthree_nodes2_fix/... and putting it in a folder in your custom nodes.
+This is only a front-end patch, you must install rgthree-comfy separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and `web/rgthree_nodes2_fix/...` and putting it in a folder in your custom nodes.
  
 ### Super-Power LoRA Loader:
 A loRA loader for crazy people with lots of loRAs, to effectively manage their horde of loRAs. *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
