@@ -4,7 +4,7 @@ Proper description with pretty pictures TBD.
 -  currently only Fast Node Bypass and Mute are fixed.
 -  Next is Seed and Label.
 -  each part toggleable in ComfyUI setting encase the fix breaks.
-This is only a fix you must install rgthree-comfy separately. 
+This is only a fix you must install rgthree-comfy separately.
  
 ### Super-Power LoRA Loader:
 A loRA loader for crazy people with lots of loRAs, to effectively manage their horde of loRAs. *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
