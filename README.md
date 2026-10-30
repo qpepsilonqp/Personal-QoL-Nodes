@@ -8,7 +8,7 @@ A loRA loader for crazy people with lots of loRAs, to effectively manage their h
 -  Move about loras in GROUPS without changing the files location.
 -  new LoRAs added to a folder or folder tree will automatically be imported after refreshing comfyUI or pressing the Rescan Folders button, if a group exists with a matching folder location will get added to the group.
 -  Search all imported loras or individual groups.
--  Create Favourite and Mixes to more effectively switch between loras.
+-  Create Favouritew and Mixes to more efficiently switch between loras.
 -  Enabled LoRA history for quickly enabling loras you have used recently. 
 -  Automagically condenses down if you make make the node narrow.
 -  Collapse the groups section to make it even smaller to fit in with your workflow.
