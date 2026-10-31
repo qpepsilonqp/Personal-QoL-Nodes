@@ -1,7 +1,9 @@
 Proper description with pretty pictures TBD.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy.
-Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no... I have with a relatively modest workflow measured that with video models and my humble 16GB of VRAM that Nodes 2.0 actually offers a video generation speed up on average, and if you move around on the workflow classic canvas can tank performance down from 35s/it to 60 - 90s/it for a step or 2, while nodes 2.0 with the the same settings goes down to more like 25-29s/it and when moving about the canvas I don't get the same stalls, FPS is lower on nodes 2.0 but it doesn’t lag, it's just low FPS which is actually preferable to me within reason. With a large workflow this might change, so do your own testing, also with a larger amount of VRAM and more memory bandwidth, I assume the bottleneck would move to compute which classic canvas is faster to draw so, you mileage may vary although the compute difference isn't that large so it would be a tiny effect either way if you had enough VRAM to hold the whole model and attention layers.
+Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no. 
+
+Cutting a long story short I believe when dealing with a lot of block swapping like when running a video model with a relative to the model size low VRAM card when you consider the size of the attention layers ontop of the model, nodes 2.0 can actually offer a generation speed advantage and will have far less lags, it will be lower FPS than the classic canvas on average, but hitches are so much more annoying than low FPS for a UI. probably has something to do with nodes 2.0 drawing everything and only changing what changes rather than redrawing everything.
 
 -  Added a gear icon for settings to nodes where it made sense.
 -  added multiple choice to setting where it made sense, rather than having to type out things where there were limited choices.
