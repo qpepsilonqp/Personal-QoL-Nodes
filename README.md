@@ -15,12 +15,12 @@ A loRA loader for crazy people with lots of loRAs, to effectively manage their h
 -  Move about loras in GROUPS without changing the files location.
 -  new LoRAs added to a folder or folder tree will automatically be imported after refreshing comfyUI or pressing the Rescan Folders button, if a group exists with a matching folder location will get added to the group.
 -  Search all imported loras or individual groups.
--  Create Favouritew and Mixes to more efficiently switch between loras.
+-  Create Favourites and Mixes to more efficiently switch between loras.
 -  Enabled LoRA history for quickly enabling loras you have used recently. 
--  Automagically condenses down if you make make the node narrow.
+-  Automagically condenses down if you make the node narrow.
 -  Collapse the groups section to make it even smaller to fit in with your workflow.
 -  A fair amount of customisation available most of which can be changed from the setting. 
--  Group/List toggle: switch between grouped and flat list.
+-  Group/List toggle: switches between grouped and a flat list.
 
 PS: I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way as much, as I have tried to reduce that, at that point I suggest rgtree's Power Lora Loader instead, which was my go to before—hence the name—but gets way too unwieldy when working with a more than I would say 15+ loras.
 
