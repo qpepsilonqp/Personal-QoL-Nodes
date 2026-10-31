@@ -1,9 +1,12 @@
 Proper description with pretty pictures TBD.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy.
--  currently only Fast Node Bypass and Mute are fixed.
--  Next is Seed and Label.
--  each part togglable in ComfyUI settings encase the fix breaks.
+Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no... I have with a relatively modest workflow measured that with video models and my humble 16GB of VRAM that Nodes 2.0 actually offers a video generation speed up on average, and if you move around on the workflow classic canvas can tank performance down from 35s/it to 60 - 90s/it for a step or 2, while nodes 2.0 with the the same settings goes down to more like 25-29s/it and when moving about the canvas I don't get the same stalls, FPS is lower on nodes 2.0 but it doesn’t lag, it's just low FPS which is actually preferable to me within reason. With a large workflow this might change, so do your own testing.
+
+-  Added a gear icon for settings to nodes where it made sense.
+-  added multiple choice to setting where it made sense, rather than having to type out things where there were limited choices.
+-  each node is togglable in ComfyUI settings encase the fix breaks.
+Gear icon was added because properties is a blocked term for Nodes 2.0, did also add a Node Properties but it gets berried half way down the left click menu, so using the dead space next to the source badge was an easy choice
 
 This is only a front-end patch, you must install rgthree-comfy separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and `web/rgthree_nodes2_fix/...` and putting it in a folder in your custom nodes.
  
