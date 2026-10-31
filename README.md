@@ -11,7 +11,7 @@ Cutting a long story short I believe when dealing with a lot of block swapping l
 
 Gear icon was added because properties is a blocked term for Nodes 2.0, did also add a Node Properties to the right click menu, but it gets berried half way down the right click menu, so using the dead space next to the source badge was an easy choice.
 
-This is only a front-end patch, you must install [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and `web/rgthree_nodes2_fix/...` and putting it in a folder in your custom nodes. designed so that if the patch breaks it wont break classic canvas, but s£$% happens so.
+PS: This is only a front-end patch only, you must install [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and `web/rgthree_nodes2_fix/...` and putting it in a folder in your custom nodes. designed so that if the patch breaks it wont break classic canvas, but s£$% happens so.
  
 ### Super-Power LoRA Loader:
 A loRA loader for crazy people with lots of loRAs, to effectively manage their horde of loRAs. *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
