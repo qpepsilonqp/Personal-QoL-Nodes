@@ -8,6 +8,7 @@ Cutting a long story short I believe when dealing with a lot of block swapping l
 -  Added a gear icon for settings to nodes where it made sense.
 -  added multiple choice to setting where it made sense, rather than having to type out things where there were limited choices.
 -  each node is togglable in ComfyUI settings encase the fix breaks.
+
 Gear icon was added because properties is a blocked term for Nodes 2.0, did also add a Node Properties to the right click menu, but it gets berried half way down the left click menu, so using the dead space next to the source badge was an easy choice.
 
 This is only a front-end patch, you must install rgthree-comfy separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and `web/rgthree_nodes2_fix/...` and putting it in a folder in your custom nodes.
