@@ -32,14 +32,13 @@ PS: I think I hyper-focused in on this one and created a monster, in a good way,
 
 ### TabbedNote:
   A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
-Okay... well you can switch each tab between a modes, Plain, Markdown Note, or Tag List.6/
-Plain and Markdown notes work like stock stock notes and markdown notes, except, well in tabs.
+Okay... well you can switch each tab between 3 modes, Plain, Markdown Note, or Tag List. Plain and Markdown notes work like stock notes and markdown notes, except, well in tabs.
 -  Tag list creates chips from your tags list.
 -  Clicking a chip will copy the tag to clipboard.
 -  Shift hold+click to copy multiple chips.
 -  Clicking a sub-headline will copy all the chips under it.
 -  Clicking a headline will copy all chips in all sub-headlines under it. 
--  Colourisable  the tabs, add tabs to groups, collapse the groups, and colourise groups.
+-  Colourisable the tabs, add tabs to groups, collapse the groups, and colourise groups.
 -  Also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a default tab to use as the output.
 -  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
 
@@ -47,7 +46,7 @@ The last 2 seem kinda gimmicky if you ask me, hence why it's berried in a settin
 
 PS: Nice if you find yourself plastering a bunch of notes and markdown notes on your workflows and creating a mess, or if you are tired of arranging you literality of notes and markdown notes, also for Anima, illustrious and also maybe MOSS Image for keeping your go to danbooru tags organised.
 
-  *Gets a lot less complicated, but much more boring and niche here for sure, so in order of least boring and niche.*
+  *Gets a lot less complicated, but much more boring and/or niche here for sure, so in order of least boring and niche.*
 
 ### Resolution Picker:
   set megapixel, aspect ratio, orientation and divisible by, with live output resolution preview, there is a node out there that is basically this minus the orientation, but I find a separate orientation setting to be useful, allows for more aspect ratios in a shorter list.
