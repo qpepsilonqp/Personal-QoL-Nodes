@@ -3,7 +3,7 @@ Proper description with pretty pictures TBD.
 ### Nodes 2.0 front-end patch for rgthree-comfy.
 Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no. 
 
-Cutting a long story short. I believe when dealing with a lot of block swapping—like when running a video model—with a relative to the model size low VRAM card, when you consider the size of the attention layers ontop of the model: I have found in my experience that nodes 2.0 can actually offer a generation speed advantage and will have far less lags. It will be lower FPS than the classic canvas on average, but hitches are so much more annoying than low FPS for a UI. probably has something to do with nodes 2.0 drawing everything and then only redrawing what changes rather than redrawing everything if you move the canvas.
+Cutting a long story short. When dealing with a lot of block swapping—like when running a video model—with a relative to the model size low VRAM card, when you consider the size of the attention layers ontop of the model: I have found in my experience that nodes 2.0 can actually offer a generation speed advantage and will have far less lags. It will be lower FPS than the classic canvas on average, but hitches are so much more annoying than low FPS for a UI. probably has something to do with nodes 2.0 drawing everything and then only redrawing what changes rather than redrawing everything if you move the canvas.
 
 -  Added a gear icon for settings to nodes where it made sense.
 -  added multiple choice to setting where it made sense, rather than having to type out things where there were limited choices.
