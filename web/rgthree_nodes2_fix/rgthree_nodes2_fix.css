@@ -91,3 +91,321 @@
 .qol-rg-nav[hidden] {
   display: none;
 }
+
+/* Label: the Nodes 2.0 node box ignores the mouse; only the area over the drawn text reacts. */
+.qol-rg-label-node {
+  pointer-events: none !important;
+}
+.qol-rg-label-hit {
+  position: absolute;
+  pointer-events: auto;
+  cursor: grab;
+  background: transparent;
+}
+.qol-rg-label-hit.is-pinned {
+  pointer-events: none;
+}
+
+/* Image Comparer */
+.qol-rg-cmp {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+.qol-rg-cmp-picks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.qol-rg-cmp-picks[hidden] {
+  display: none;
+}
+.qol-rg-cmp-pick {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--component-node-widget-background, #2a2a2e);
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.qol-rg-cmp-pick:hover {
+  background: var(--component-node-widget-background-hovered, #34343a);
+}
+.qol-rg-cmp-pick.is-on {
+  color: var(--component-node-foreground, #e6e6ea);
+  opacity: 1;
+}
+.qol-rg-cmp-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 100px;
+  overflow: hidden;
+  user-select: none;
+  cursor: col-resize;
+}
+.qol-rg-cmp-stage img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.qol-rg-cmp-b {
+  visibility: hidden;
+}
+.qol-rg-cmp-line {
+  position: absolute;
+  width: 1px;
+  margin-left: -0.5px;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+.qol-rg-cmp-line[hidden],
+.qol-rg-cmp-empty[hidden] {
+  display: none;
+}
+.qol-rg-cmp-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  font-size: 12px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Power Lora Loader */
+.qol-rg-pll-row,
+.qol-rg-pll-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: 28px;
+  min-width: 0;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--component-node-foreground, #e6e6ea);
+}
+.qol-rg-pll-row {
+  background: var(--component-node-widget-background, #2a2a2e);
+}
+.qol-rg-pll-row:hover {
+  background: var(--component-node-widget-background-hovered, #34343a);
+}
+.qol-rg-pll-row.is-off {
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+}
+.qol-rg-pll-head {
+  height: 22px;
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+}
+.qol-rg-pll-head.is-empty > * {
+  visibility: hidden;
+}
+.qol-rg-pll-toggle {
+  display: inline-block;
+  cursor: pointer;
+}
+.qol-rg-pll-toggle.is-on {
+  background: var(--primary-background, #3b82f6);
+}
+.qol-rg-pll-toggle.is-on .qol-rg-knob {
+  transform: translateX(12px);
+  background: #fff;
+}
+.qol-rg-pll-toggle.is-mixed .qol-rg-knob {
+  transform: translateX(6px);
+}
+.qol-rg-pll-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.qol-rg-pll-row .qol-rg-pll-name {
+  cursor: pointer;
+}
+.qol-rg-pll-info {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: italic bold 11px/1 serif;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.qol-rg-pll-info:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.qol-rg-pll-num {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  width: 72px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--component-node-widget-background-selected, #4a4a52);
+}
+.qol-rg-pll-num[hidden] {
+  display: none;
+}
+.qol-rg-pll-step {
+  width: 18px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.qol-rg-pll-step:hover {
+  color: var(--component-node-foreground, #e6e6ea);
+}
+.qol-rg-pll-val {
+  flex: 1 1 auto;
+  text-align: center;
+  cursor: ew-resize;
+  user-select: none;
+}
+.qol-rg-pll-cols {
+  display: inline-flex;
+  gap: 6px;
+}
+.qol-rg-pll-col {
+  width: 72px;
+  text-align: center;
+}
+.qol-rg-pll-head .qol-rg-pll-cols::before {
+  /* Keeps the column labels above the strength boxes (info button width + gap). */
+  content: "";
+  width: 18px;
+}
+.qol-rg-pll-add {
+  width: 100%;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: var(--component-node-widget-background, #2a2a2e);
+  color: var(--component-node-foreground, #e6e6ea);
+  font-size: 12px;
+  cursor: pointer;
+}
+.qol-rg-pll-add:hover {
+  background: var(--component-node-widget-background-hovered, #34343a);
+}
+
+/* Node Properties: type-in panel (opens where a submenu would) */
+.qol-rg-type {
+  position: fixed;
+  z-index: 10000;
+  width: 260px;
+  padding: 8px;
+  border: 1px solid var(--interface-stroke, #3a3a40);
+  border-radius: 8px;
+  background: var(--interface-menu-surface, #1e1e22);
+  color: var(--component-node-foreground, #e6e6ea);
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.qol-rg-type-title {
+  margin-bottom: 6px;
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  font-size: 12px;
+}
+.qol-rg-type-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--interface-stroke, #3a3a40);
+  border-radius: 6px;
+  background: var(--component-node-widget-background, #2a2a2e);
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+.qol-rg-type-input:focus {
+  border-color: var(--primary-background, #3b82f6);
+}
+.qol-rg-type-input.is-bad {
+  border-color: var(--destructive-background, #dc2626);
+}
+.qol-rg-type-list {
+  max-height: 260px;
+  margin-top: 4px;
+  overflow-y: auto;
+}
+.qol-rg-type-list[hidden] {
+  display: none;
+}
+.qol-rg-type-opt {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qol-rg-type-opt span {
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  font-size: 12px;
+}
+.qol-rg-type-opt:hover,
+.qol-rg-type-opt.is-active {
+  background: var(--interface-menu-component-surface-hovered, #2e2e34);
+}
+.qol-rg-type-hint {
+  margin-top: 6px;
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  font-size: 11px;
+}
+
+/* Settings gear (Nodes 2.0): level with the node's badge strip, clear of the resize corner. */
+.qol-rg-gear {
+  position: absolute;
+  right: 22px;
+  bottom: 8px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--component-node-foreground-secondary, #9a9aa2);
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0.75;
+}
+.qol-rg-gear:hover {
+  opacity: 1;
+  color: var(--component-node-foreground, #e6e6ea);
+  background: var(--component-node-widget-background-hovered, #34343a);
+}
+.qol-rg-gear[hidden] {
+  display: none;
+}
