@@ -61,6 +61,9 @@ The last 2 seem kinda gimmicky if you ask me, hence why it's berried in a settin
 PS: Nice if you find yourself plastering a bunch of notes and markdown notes on your workflows and creating a mess, or if you are tired of arranging you literality of notes and markdown notes, also for Anima, illustrious and also maybe MOSS Image for keeping your go to danbooru tags organised.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy.
+
+<img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
+
 Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no. 
 
 Cutting a long story short. When dealing with a lot of block swapping—like when running a video model—with a relative to the model size low VRAM card, when you consider the size of the attention layers ontop of the model: I have found in my experience that nodes 2.0 can actually offer a generation speed advantage and will have far less lags. It will be lower FPS than the classic canvas on average, but hitches are so much more annoying than low FPS for a UI. probably has something to do with nodes 2.0 drawing everything and then only redrawing what changes rather than redrawing everything if you move the canvas.
