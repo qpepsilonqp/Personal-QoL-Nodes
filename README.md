@@ -50,7 +50,7 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 **Tab Groups:*** groups pretty basic for tabbed systems nowadays I assume no explantation is necessary.
 
-Honestly I thought this would have already existed, at least the tabbed notes and markdown notes, but I asked multiple agents to scrawler the internet and looked myself, Nada, so honestly given how hum drum it may be the most original node in this pack.
+Spell Check and Pysssss Integration: Each tab can have Spell Check and Pysssss enabled/disabled.
 
 Oh almost forgot in the setting you can set it up to be a text prompt, uses the current tab by default, but you can set and unset a default tab, can also store text prompts automatically that are connected. I'm not using it this way, but... why not.
 
