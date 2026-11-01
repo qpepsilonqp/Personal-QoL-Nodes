@@ -7,20 +7,26 @@ A loRA loader built for crazy people far too many loRAs for even a single model,
 *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
 
 **All Modes and Compactions of the Same Node:**
-<img src="Img/Super-PowerLoRALoader_modes-and-compactions.png" width="800">.
+
+<img src="Img/Super-PowerLoRALoader_modes-and-compactions.png" width="600">.
+
 every mode switch is 1 click, 2 clicks for one which will ask if you want it to be the default behaviour with a check box, then it gets out of your way and is 1 click.
 
 Setup Wizard: automatically finds all `ComfyUI/model/loras` locations and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
-**Narrow Mode:** which you get by dragging the node narrow enough, everything is still accessible by hovering over the vertical "..." icon.
-<img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="400">.
+**Narrow Mode:** 
+which you get by dragging the node narrow enough, everything is still accessible by hovering over the vertical "..." icon.
 
-in case of model strength hover over the compact model strength
-<img src="Img/Compact_Loader_W-SRT.jpg" width="400">.
+<img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">.
+
+in case of model strength hover over the compact model strength:
+
+<img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
 
 **Plain List mode:** 
-
 while collapsing enabled can make it like the rgthree's Power Lora Loader, but with search, bookmarks, favourites, mixes and being able to move in whole folder trees of loras if you so choose, also limits you to 20 rows before enabling scrolling.
+
+<img src="Img/Loader_Plane-List.jpg" width="300">.
 
 
 
