@@ -32,9 +32,15 @@ while collapsing enabled can make it like the rgthree's Power Lora Loader, but w
 
 being real, you should just be using the narrow mode, maybe with groups collapsed, and just rely on search to find your loRAs, unless you have a small number of loRAs probably 10 or less. if you have more but want specific set of loras, just add all the loras for the model and use Mixes that’s exactly what that is for.
 
-Quick Menu, Favourites, History and Mixes:
+**Quick Menu, Favourites, History:**
 
-Does what it says on the tin, quickly access Favourites, History and Mixes and make some changes to them.
+<img src="Img/LL_Quick-Menu.png" width="300">.
+
+Does what it says on the tin, quickly access Favourites, History and Mixes and make some changes to them. 
+
+**Mixes:** 
+
+probably the only thing I need to explain, a Mix here is a collection of loRAs you have added to the node, they get their own strength so you can load them in the way you have dialled them in to do what you want, in enabled or in list mode you can still enable loras that are in the Mix, doing this will grey out the lora in the mix and will not change the mixes strength, instead you will get the regular strength you have set for the lora, or default 1.00 if you have not entered a strength.
 
 
 
