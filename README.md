@@ -30,7 +30,13 @@ while collapsing enabled can make it like the rgthree's Power Lora Loader, but w
 
 <img src="Img/Loader_Plane-List.jpg" width="300">.
 
-being real, you should just be using the narrow mode, maybe with groups collapsed, and just rely on search to find your loRAs, unless you have a small number of loRAs probably 10 or less
+being real, you should just be using the narrow mode, maybe with groups collapsed, and just rely on search to find your loRAs, unless you have a small number of loRAs probably 10 or less. if you have more but want specific set of loras, just add all the loras for the model and use Mixes that’s exactly what that is for.
+
+Quick Menu, Favourites, History and Mixes:
+
+Does what it says on the tin, quickly access Favourites, History and Mixes and make some changes to them.
+
+
 
 ### TabbedNote:
   A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
