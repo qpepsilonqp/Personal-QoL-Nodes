@@ -19,15 +19,16 @@ which you get by dragging the node narrow enough, everything is still accessible
 
 <img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">.
 
-in case of model strength hover over the compact model strength:
-
 <img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
+
+in case of model strength hover over the compact model strength.
 
 **Plain List mode:** 
 while collapsing enabled can make it like the rgthree's Power Lora Loader, but with search, bookmarks, favourites, mixes and being able to move in whole folder trees of loras if you so choose, also limits you to 20 rows before enabling scrolling.
 
 <img src="Img/Loader_Plane-List.jpg" width="300">.
 
+being real, you should just be using the narrow mode, maybe with groups collapsed, and just rely on search to find your loRAs, at least for me that how the node works best, but I wanted flexibility for people who are set in their ways, and if they install the node at least they have a chance of changing their mind.
 
 
 
