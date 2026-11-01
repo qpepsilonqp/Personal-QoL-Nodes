@@ -1,21 +1,30 @@
 Proper description with pretty pictures TBD.
 
 ### Super-Power LoRA Loader:
-A loRA loader for crazy people with lots of loRAs, to effectively manage their horde of loRAs. *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
-  
--  Add individual LoRAs, folders or folder trees with an initial import wizard, which can be accessed in setting after setup. 
--  Imported folder trees duplicated in group trees.
--  Move about loras in GROUPS without changing the files location.
--  new LoRAs added to a folder or folder tree will automatically be imported after refreshing comfyUI or pressing the Rescan Folders button, if a group exists with a matching folder location will get added to the group.
--  Search all imported loras or individual groups.
--  Create Favourites and Mixes to more efficiently switch between loras.
--  Enabled LoRA history for quickly enabling loras you have used recently. 
--  Automagically condenses down if you make the node narrow.
--  Collapse the groups section to make it even smaller to fit in with your workflow.
--  A fair amount of customisation available most of which can be changed from the setting. 
--  Group/List toggle: switches between grouped and a flat list.
 
-PS: I think I hyper-focused in on this one and created a monster, in a good way, I think... well for anyone with like 15+ loras for a model, otherwise the extra functions can get in the way—much as I have tried to reduce that—at that point I suggest rgtree's Power Lora Loader instead, which was my go to before—hence the name—but gets way too unwieldy when working with a more than I would say ~15+ loras.
+A loRA loader built for crazy people far too many loRAs for even a single model, to effectively manage their horde of loRAs. 
+
+*still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
+
+**All Modes and Compactions of the Same Node:**
+<img src="Img/Super-PowerLoRALoader_modes-and-compactions.png" width="800">.
+every mode switch is 1 click, 2 clicks for one which will ask if you want it to be the default behaviour with a check box, then it gets out of your way and is 1 click.
+
+Setup Wizard: automatically finds all `ComfyUI/model/loras` locations and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
+
+**Narrow Mode:** which you get by dragging the node narrow enough, everything is still accessible by hovering over the vertical "..." icon.
+<img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="400">.
+
+in case of model strength hover over the compact model strength
+<img src="Img/Compact_Loader_W-SRT.jpg" width="400">.
+
+**Plain List mode:** 
+
+while collapsing enabled can make it like the rgthree's Power Lora Loader, but with search, bookmarks, favourites, mixes and being able to move in whole folder trees of loras if you so choose, also limits you to 20 rows before enabling scrolling.
+
+
+
+
 
 ### TabbedNote:
   A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
