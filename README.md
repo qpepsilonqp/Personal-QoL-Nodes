@@ -31,11 +31,11 @@ being real, you should just be using the narrow mode, maybe with groups collapse
 
 <img src="Img/LL_Quick-Menu.png" width="300">.
 
-Does what it says on the tin, quickly access Favourites, History and Mixes and make some changes to them. 
+Does what it says on the tin, quickly access Favourites, History and Mixes and make some limited changes to them. 
 
 **Mixes:** 
 
-probably the only thing I need to explain, a Mix here is a collection of loRAs you have added to the node, they get their own strength so you can load them in the way you have dialled them in to do what you want, in enabled or in list mode you can still enable loras that are in the Mix, doing this will grey out the lora in the mix and will not change the mixes strength, instead you will get the regular strength you have set for the lora, or default 1.00 if you have not entered a strength.
+probably the only thing I need to explain, a Mix here is a collection of loRAs you have added to the node, they save their  strengths separately to the main strength, so you can load them in the way you have dialled them in to do what you want, in enabled or in list mode you can still enable loras that are in the Mix, doing this will grey out the lora in the mix and will not change the mixes strength, instead you will get the regular strength you have set for the lora, or default 1.00 if you have not entered a strength.
 
 
 
