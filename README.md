@@ -30,10 +30,7 @@ while collapsing enabled can make it like the rgthree's Power Lora Loader, but w
 
 <img src="Img/Loader_Plane-List.jpg" width="300">.
 
-being real, you should just be using the narrow mode, maybe with groups collapsed, and just rely on search to find your loRAs, at least for me that how the node works best, but I wanted flexibility for people who are set in their ways, and if they install the node at least they have a chance of changing their mind.
-
-
-
+being real, you should just be using the narrow mode, maybe with groups collapsed, and just rely on search to find your loRAs, unless you have a small number of loRAs probably 10 or less
 
 ### TabbedNote:
   A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
