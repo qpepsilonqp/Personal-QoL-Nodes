@@ -1,5 +1,3 @@
-Proper description with pretty pictures TBD.
-
 ### Super-Power LoRA Loader:
 
 A loRA loader built for crazy people far too many loRAs for even a single model, to effectively manage their horde of loRAs. 
