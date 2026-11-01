@@ -18,9 +18,7 @@ Setup Wizard: automatically finds all `ComfyUI/model/loras` locations and allows
 
 which you get by dragging the node narrow enough, everything is still accessible by hovering over the vertical "..." icon and in the case of model strength hover over the compact model strength.
 
-<img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">.
-
-<img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
+<img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">. <img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
 
 
 
