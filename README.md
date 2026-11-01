@@ -15,6 +15,7 @@ every mode switch is 1 click, 2 clicks for one which will ask if you want it to 
 Setup Wizard: automatically finds all `ComfyUI/model/loras` locations and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
 **Narrow Mode:** 
+
 which you get by dragging the node narrow enough, everything is still accessible by hovering over the vertical "..." icon.
 
 <img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">.
@@ -24,6 +25,7 @@ which you get by dragging the node narrow enough, everything is still accessible
 in case of model strength hover over the compact model strength.
 
 **Plain List mode:** 
+
 while collapsing enabled can make it like the rgthree's Power Lora Loader, but with search, bookmarks, favourites, mixes and being able to move in whole folder trees of loras if you so choose, also limits you to 20 rows before enabling scrolling.
 
 <img src="Img/Loader_Plane-List.jpg" width="300">.
