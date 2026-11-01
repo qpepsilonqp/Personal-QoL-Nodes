@@ -12,7 +12,7 @@ A loRA loader built for crazy people far too many loRAs for even a single model,
 
 every mode switch is 1 click, 2 clicks for one which will ask if you want it to be the default behaviour with a check box, then it gets out of your way and is 1 click.
 
-Setup Wizard: automatically finds all `ComfyUI/model/loras` locations and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
+Setup Wizard: automatically finds all `ComfyUI/model/loras` locations—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and keep different loras for the same model in different installations and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
 **Narrow Mode:** 
 
