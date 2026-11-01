@@ -40,11 +40,19 @@ probably the only thing I need to explain, a Mix here is a collection of loRAs y
 
 
 ### TabbedNote:
-For organising a Notes and Markdown Notes into a centralised location, all data kept within the workflow, also add a tag list loosely based on a mix between Markdown Note and the chip system from the model info from rgthree Power Lora Loader.
+For organising a Notes and Markdown Notes into a centralised location, all data kept within the workflow, 
 
-<img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
+<img src="Img/TabbedNote_Tab-Types.jpg" width="400">.
 
+**Tag List:** loosely based on a mix between Markdown Note and the chip system from the model info from rgthree Power Lora Loader.
 
+<img src="Img/TabbedNote_tags-tab_and_ground_Demo.jpg" width="400">.
+
+**Tab Groups:*** groups pretty basic for tabbed systems nowadays I assume no explantation is necessary.
+
+Honestly I thought this would have already existed, at least the tabbed notes and markdown notes, but I asked multiple agents to scrawler the internet and looked myself, Nada, so honestly given how hum drum it may be the most original node in this pack.
+
+Oh almost forgot in the setting you can set it up to be a text prompt, uses the current tab by default, but you can set and unset a default tab, can also store text prompts automatically that are connected. I'm not using it this way, but... why not.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
