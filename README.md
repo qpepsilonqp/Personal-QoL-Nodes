@@ -63,17 +63,9 @@ PS: Nice if you find yourself plastering a bunch of notes and markdown notes on 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
 
-Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no. 
+Why I have bothered? 
 
-Cutting a long story short. When dealing with a lot of block swapping—like when running a video model—with a relative to the model size low VRAM card, when you consider the size of the attention layers ontop of the model: I have found in my experience that nodes 2.0 can actually offer a generation speed advantage and will have far less lags. It will be lower FPS than the classic canvas on average, but hitches are so much more annoying than low FPS for a UI. probably has something to do with nodes 2.0 drawing everything and then only redrawing what changes rather than redrawing everything if you move the canvas.
-
--  Added a gear icon for settings to nodes where it made sense.
--  added multiple choice to setting where it made sense, rather than having to type out things where there were limited choices.
--  each node is togglable in ComfyUI settings encase the fix breaks.
-
-Gear icon was added because properties is a blocked term for Nodes 2.0, did also add a Node Properties to the right click menu, but it gets berried half way down the right click menu, so using the dead space next to the source badge was an easy choice.
-
-PS: This is only a front-end patch only, you must install [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) separately if you want it, if you want the patch only it should be possible to take the `__init__.py` and `web/rgthree_nodes2_fix/...` and putting it in a folder in your custom nodes. designed so that if the patch breaks it wont break classic canvas, but s£$% happens so.
+I noticed a generation speed increase with nodes 2.0 when you are having to block swap a lot with nodes 2.0 vs classic canvas and you get a lot less hitches in both the UI and the model it's self when dragging the canvas, like with a video model on a 16GB card when pushing resolution and length to the limits. Admittedly you do get a lower canvas FPS, but hitches are much worse than low FPS, and generation speed is even more important, if you have plenty of VRAM pleas ignore, *jealousy intensifying.* Think it has something to do with how the classic canvas redraws everything as you drag the canvas. At any rate it only took a couple of hours and about 10-15% of my weekly Claude usage allowance, so meh.
 
   *Gets a lot less complicated, but much more boring and/or niche here for sure, so in order of least boring and niche.*
 
