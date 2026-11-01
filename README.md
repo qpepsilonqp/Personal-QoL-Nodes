@@ -13,7 +13,7 @@ every mode switch is 1 click, 2 clicks for one which will ask if you want it to 
 Setup Wizard: automatically finds all `ComfyUI/model/loras` location—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
 **Narrow Mode:** 
-Just drag the node narrow enough and it will automatically compact everything that needs compacting, everything is still accessible by hovering over the vertical "..." icon and in the case of model strength hover over the compact model strength.
+Just drag the node narrow enough and it will automatically compact everything that needs compacting, everything is still accessible by hovering over the vertical "..." icons and in the case of model strength hover over the compact model strength.
 
 <img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">. <img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
 
@@ -33,7 +33,7 @@ Does what it says on the tin, quickly access Favourites, History and Mixes and m
 
 **Mixes:** 
 
-probably the only thing I need to explain, a Mix here is a collection of loRAs you have added to the node, they save their  strengths separately to the main strength, so you can load them in the way you have dialled them in to do what you want, in enabled or in list mode you can still enable loras that are in the Mix, doing this will grey out the lora in the mix and will not change the mixes strength, instead you will get the regular strength you have set for the lora, or default 1.00 if you have not entered a strength.
+probably the only thing I need to explain, a Mix here is a collection of loRAs you have added to the node, they save their strengths separately to the main strength, so you can load them in the way you have dialled them in to do what you want, in enabled or in list mode you can still enable loras that are in the Mix, doing this will grey out the lora in the mix and will not change the mixes strength, instead you will get the regular strength you have set for the lora, or default 1.00 if you have not entered a strength.
 
 
 
