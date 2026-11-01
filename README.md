@@ -59,7 +59,7 @@ I noticed a generation speed increase with nodes 2.0 when you are having to bloc
 
 #### Reload between switches between classic canvas and notes 2.0!
 
-  *Gets a lot less complicated, but much more boring and/or niche here for sure, so in order of least boring and niche.*
+  *Gets a lot less complicated, but much more boring and/or niche here for sure, so in order of least boring and niche, although they're self explanatory basic nodes so no picture.*
 
 ### Resolution Picker:
   set megapixel, aspect ratio, orientation and divisible by, with live output resolution preview, there is a node out there that is basically this minus the orientation, but I find a separate orientation setting to be useful, allows for more aspect ratios in a shorter list.
