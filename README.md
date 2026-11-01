@@ -46,6 +46,10 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 <img src="Img/TabbedNote_tags-tab_and_ground_Demo.jpg" width="400">.
 
+-  Click individual chips to copy them to clipboard.
+-  Holding Shift + Click copies all clicked chips.
+-  Clicking a title or sub-title will copy all the chips contained within the title / sub-title.
+
 **Spell Check and Pysssss Integration:** Each tab can have Spell Check and Pysssss enabled/disabled though it's right click menu.
 
 Oh almost forgot in the setting you can set it up to be a text prompt, uses the current tab by default, but you can set and unset a default tab, can also store text prompts automatically that are connected. I'm not using it this way, but... why not.
