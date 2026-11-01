@@ -46,9 +46,7 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 <img src="Img/TabbedNote_tags-tab_and_ground_Demo.jpg" width="400">.
 
-**Tab Groups:*** groups pretty basic for tabbed systems nowadays I assume no explantation is necessary.
-
-Spell Check and Pysssss Integration: Each tab can have Spell Check and Pysssss enabled/disabled.
+**Spell Check and Pysssss Integration:** Each tab can have Spell Check and Pysssss enabled/disabled though it's right click menu.
 
 Oh almost forgot in the setting you can set it up to be a text prompt, uses the current tab by default, but you can set and unset a default tab, can also store text prompts automatically that are connected. I'm not using it this way, but... why not.
 
