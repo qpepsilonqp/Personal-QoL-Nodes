@@ -42,6 +42,8 @@ probably the only thing I need to explain, a Mix here is a collection of loRAs y
 ### TabbedNote:
 For organising a Notes and Markdown Notes into a centralised location, all data kept within the workflow, also add a tag list loosely based on a mix between Markdown Note and the chip system from the model info from rgthree Power Lora Loader.
 
+<img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
+
 
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
