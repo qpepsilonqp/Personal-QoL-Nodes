@@ -15,12 +15,9 @@ every mode switch is 1 click, 2 clicks for one which will ask if you want it to 
 Setup Wizard: automatically finds all `ComfyUI/model/loras` locations—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and keep different loras for the same model in different installations and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
 **Narrow Mode:** 
-
-which you get by dragging the node narrow enough, everything is still accessible by hovering over the vertical "..." icon and in the case of model strength hover over the compact model strength.
+Just drag the node narrow enough and it will automatically compact everything that needs compacting, everything is still accessible by hovering over the vertical "..." icon and in the case of model strength hover over the compact model strength.
 
 <img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">. <img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
-
-
 
 **Plain List mode:** 
 
@@ -43,20 +40,9 @@ probably the only thing I need to explain, a Mix here is a collection of loRAs y
 
 
 ### TabbedNote:
-  A tabbed note node... dur. *still in late beta, so some minor things might change, again feel free to throw in your 2 cents.*
-Okay... well you can switch each tab between 3 modes, Plain, Markdown Note, or Tag List. Plain and Markdown notes work like stock notes and markdown notes, except, well in tabs.
--  Tag list creates chips from your tags list.
--  Clicking a chip will copy the tag to clipboard.
--  Shift hold+click to copy multiple chips.
--  Clicking a sub-headline will copy all the chips under it.
--  Clicking a headline will copy all chips in all sub-headlines under it. 
--  Colourisable the tabs, add tabs to groups, collapse the groups, and colourise groups.
--  Also click on setting the "..." and set it to be able to be used as a tabbed text prompt, by default it will use the current tab as the text prompt, you can set a default tab to use as the output.
--  You can also set it to dump a prompt into a tab automatically by enabling the "Text input" and connecting in text from your prompt node.
+For organising a Notes and Markdown Notes into a centralised location, all data kept within the workflow, also add a tag list loosely based on a mix between Markdown Note and the chip system from the model info from rgthree Power Lora Loader.
 
-The last 2 seem kinda gimmicky if you ask me, hence why it's berried in a settings menu you shouldn't really have to touch otherwise. 
 
-PS: Nice if you find yourself plastering a bunch of notes and markdown notes on your workflows and creating a mess, or if you are tired of arranging you literality of notes and markdown notes, also for Anima, illustrious and also maybe MOSS Image for keeping your go to danbooru tags organised.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
