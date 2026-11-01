@@ -60,8 +60,7 @@ The last 2 seem kinda gimmicky if you ask me, hence why it's berried in a settin
 
 PS: Nice if you find yourself plastering a bunch of notes and markdown notes on your workflows and creating a mess, or if you are tired of arranging you literality of notes and markdown notes, also for Anima, illustrious and also maybe MOSS Image for keeping your go to danbooru tags organised.
 
-### Nodes 2.0 front-end patch for rgthree-comfy.
-
+### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
 
 Why bother with nodes 2.0, is it because I am simply blown away with the aesthetic... no. 
