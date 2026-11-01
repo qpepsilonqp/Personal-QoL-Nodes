@@ -57,7 +57,7 @@ Why I have bothered?
 
 I noticed a generation speed increase with nodes 2.0 when you are having to block swap a lot with nodes 2.0 vs classic canvas and you get a lot less hitches in both the UI and the model it's self when dragging the canvas, like with a video model on a 16GB card when pushing resolution and length to the limits. Admittedly you do get a lower canvas FPS, but hitches are much worse than low FPS, and generation speed is even more important, if you have plenty of VRAM pleas ignore, *jealousy intensifying.* Think it has something to do with how the classic canvas redraws everything as you drag the canvas. At any rate it only took a couple of hours and about 10-15% of my weekly Claude usage allowance, so meh.
 
-#### Reload between switches from classic canvas and notes 2.0!
+#### Reload between switches between classic canvas and notes 2.0!
 
   *Gets a lot less complicated, but much more boring and/or niche here for sure, so in order of least boring and niche.*
 
