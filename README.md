@@ -48,7 +48,7 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 -  Click individual chips to copy them to clipboard.
 -  Holding Shift + Click copies all clicked chips.
--  Clicking a title or sub-title will copy all the chips contained within the title / sub-title.
+-  Clicking a sub-title will copy all the chips contained within the sub-title.
 
 loosely based on a mix between Markdown Note and the chip system from the model info from rgthree Power Lora Loader, best used with model that rely on danbooru tags—Illustrious, Anima, and to some extent MOSS Image—to keep your go to tags and artists organised and easily accessible. 
 
