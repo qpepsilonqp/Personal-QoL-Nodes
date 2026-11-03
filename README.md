@@ -49,10 +49,21 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 <img src="Img/TabbedNote_tags-tab_and_ground_Demo.jpg" width="400">.
 
+**Formatting:**
+-  `# the headline name` for headline
+-  `## the sub-headline name` for sub-headline
+-  `/#` to close a headline
+-  `/##` to close a sub-headline
+-  `the tag | the tag's tooltip`
+-  create a new line per item that you want to be a chip
+
+**Copying Chips:**
 -  Click individual chips to copy them to clipboard.
 -  Holding Shift + Click copies all clicked chips.
--  Right click a chip and a select mode will start, the rest is pretty self explanatory. 
+-  Right click a chip and a select mode will start, left or right clicking a chip will select another chip, click a chip again to unselect a chip. 
 -  Clicking a sub-title will copy all the chips contained within the sub-headline.
+
+
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
