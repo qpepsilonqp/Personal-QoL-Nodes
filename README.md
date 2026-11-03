@@ -48,17 +48,10 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 -  Click individual chips to copy them to clipboard.
 -  Holding Shift + Click copies all clicked chips.
+-  Right click a chip and a select mode will start, the rest is pretty self explanatory. 
 -  Clicking a sub-title will copy all the chips contained within the sub-title.
-
-loosely based on a mix between Markdown Note and the chip system from the model info from rgthree Power Lora Loader, best used with model that rely on danbooru tags—Illustrious, Anima, and to some extent MOSS Image—to keep your go to tags and artists organised and easily accessible. 
-
-also works for natural language prompt sections eg: `**Camera:** Shot with a Canon EOS R5 with an RF 85mm f/1.4L, shot at f/8, sharp focus, bokeh, very aesthetic` can be all one chip, or multiple chips so you can choose for example between bokeh or not, you could for example have a sub-title for the type of camera, lense, focal length and stop. so you can with 4 clicks you can build a camera setup, have other sub sections for different photography terms, it can be really powerful even with natural language when dealing with technical terms you will never remember, but are best used with natural language models. 
-
-In fact I think I'm going to get an LLM to create such a list for me right now.
-
-**Spell Check and Pysssss Integration:** Each tab can have Spell Check and Pysssss enabled/disabled though it's right click menu.
-
-Oh almost forgot in the setting you can set it up to be a text prompt, uses the current tab by default, but you can set and unset a default tab, can also store text prompts automatically that are connected. I'm not using it this way, but... why not.
+-  Each tab can have Spell Check and Pysssss enabled/disabled though right clicking the tab.
+-  Can be setup to be used as a tabbed text prompt or load any text string connected as a tab, setup through "..." Note Options.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
