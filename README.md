@@ -42,6 +42,9 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 <img src="Img/TabbedNote_Tab-Types.jpg" width="400">.
 
+-  Each tab can have Spell Check and Pysssss enabled/disabled though right clicking the tab.
+-  Can be setup to be used as a tabbed text prompt or load any text string connected as a tab, setup through "..." Note Options.
+
 **Tag List:** 
 
 <img src="Img/TabbedNote_tags-tab_and_ground_Demo.jpg" width="400">.
@@ -50,8 +53,6 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 -  Holding Shift + Click copies all clicked chips.
 -  Right click a chip and a select mode will start, the rest is pretty self explanatory. 
 -  Clicking a sub-title will copy all the chips contained within the sub-title.
--  Each tab can have Spell Check and Pysssss enabled/disabled though right clicking the tab.
--  Can be setup to be used as a tabbed text prompt or load any text string connected as a tab, setup through "..." Note Options.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
