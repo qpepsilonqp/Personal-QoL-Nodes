@@ -52,7 +52,7 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 -  Click individual chips to copy them to clipboard.
 -  Holding Shift + Click copies all clicked chips.
 -  Right click a chip and a select mode will start, the rest is pretty self explanatory. 
--  Clicking a sub-title will copy all the chips contained within the sub-title.
+-  Clicking a sub-title will copy all the chips contained within the sub-headline.
 
 ### Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
