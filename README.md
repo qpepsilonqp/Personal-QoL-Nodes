@@ -43,7 +43,7 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 <img src="Img/TabbedNote_Tab-Types.jpg" width="400">.
 
 -  Each tab can have Spell Check and Pysssss enabled/disabled though right clicking the tab.
--  Can be setup to be used as a tabbed text prompt or load any text string connected as a tab, setup through "..." Note Options.
+-  Can be setup to be used as a tabbed text prompt or load any text string connected as a tab, setup through "..." Note Options in the top right corner of the node.
 
 **Tag List:** 
 
