@@ -49,7 +49,9 @@ For organising a Notes and Markdown Notes into a centralised location, all data 
 
 <img src="Img/TabbedNote_tags-tab_and_ground_Demo.jpg" width="400">.
 
-**Formatting:**
+double click the tag list to edit, just like markdown note.
+
+**Edit Formatting:**
 -  `# the headline name` for headline
 -  `## the sub-headline name` for sub-headline
 -  `/#` to close a headline
