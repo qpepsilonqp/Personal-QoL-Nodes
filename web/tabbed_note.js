@@ -7,12 +7,13 @@ import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 
 const EXT_NAME = "TabbedNote.TabbedNote";
+const VERSION = "9.0.a"; // shown at the end of the note's ⋯ menu
 const NODE_TYPE = "TabbedNote";
 const UI_KEY = "tabnote_text"; // key the Python part uses to hand incoming text back to the note
 const GENERATED = "Generated";
 const OUTPUT_KINDS = [
-    { id: "pass", label: "Pass-through", socket: "pass-through" },
-    { id: "note", label: "Note as text", socket: "note text" },
+    { id: "pass", label: "Pass-Through", socket: "pass-through" },
+    { id: "note", label: "Note as Text", socket: "note text" },
 ];
 
 // ---------- styles ----------
@@ -111,6 +112,57 @@ async function copyText(text) {
     }
 }
 
+// ---------- Stored Tabs: a shared library in ComfyUI's user folder ----------
+// One JSON file in ComfyUI's user data folder (user/default/), read and written through ComfyUI's
+// own user-data API, so every Tabbed Note in every workflow sees the same Stored Tabs. Nothing is
+// written inside custom_nodes. Each entry: {id, name, folder (null = none), tab: {type, color, ...}}.
+// Every change reads the latest file first, so notes in other browser tabs aren't overwritten.
+const LIB_FILE = "tabbed_note_stored_tabs.json";
+const STORED_FIELDS = ["type", "color", "icon", "content", "spellcheck", "autocomplete", "copyComma", "copyUnderscore", "collapsed"];
+
+// The last library read, so the tab menu can open at once with the current folders.
+// undefined = not read yet, null = couldn't be read.
+let libCache;
+async function loadLibrary() {
+    libCache = await readLibrary();
+    return libCache;
+}
+async function readLibrary() {
+    try {
+        const r = await api.getUserData(LIB_FILE, { cache: "no-store" });
+        if (r.status === 404) return { version: 1, tabs: [] };
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = await r.json();
+        // A damaged file returns null (unavailable) rather than an empty list, so it's never overwritten.
+        if (!d || !Array.isArray(d.tabs)) throw new Error("not a Stored Tabs file");
+        return { version: 1, tabs: d.tabs.filter((t) => t && typeof t.name === "string" && t.tab) };
+    } catch (e) {
+        console.warn("[TabbedNote] Couldn't read Stored Tabs.", e);
+        return null;
+    }
+}
+
+async function saveLibrary(lib) {
+    await api.storeUserData(LIB_FILE, { version: 1, tabs: lib.tabs }, { overwrite: true, stringify: true, throwOnError: true });
+}
+
+// Read once at start-up so the first tab menu already knows the folders.
+loadLibrary();
+
+// Plain copies through JSON: ComfyUI can wrap node data in watcher (Proxy) objects, which the
+// browser's structuredClone refuses to copy.
+const plainCopy = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
+
+function snapshotTab(tab) {
+    const o = {};
+    for (const k of STORED_FIELDS) o[k] = plainCopy(tab[k]);
+    return o;
+}
+
+// Folders exist only while something is in them, so an empty folder disappears by itself.
+const libFolders = (lib) => [...new Set(lib.tabs.map((t) => t.folder).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+const byName = (a, b) => a.name.localeCompare(b.name);
+
 // ---------- tag lists ----------
 // "# Headline", "## Sub headline", and every other non-empty line is one tag (commas allowed).
 // "tag | description" adds a hover description; it is never copied.
@@ -126,35 +178,64 @@ function parseTagLine(line) {
 // Every headline, sub headline and tag records the line it came from (`line`), and headlines and
 // sub headlines record where their section ends (`end`, exclusive), so they can be moved by
 // moving lines of text.
+// Closing markers: a line of just "/##" closes the open sub headline, so later tags belong to the
+// headline again; "/#" closes the open headline (and any sub headline in it), so later tags belong
+// to no headline and show in place. A closed section records `closeLine` and ends after it.
+// A headline keeps all its own tags in `chips` (key index = position in that array) and the order
+// they appear in among its sub headlines in `order`: [{chips: [from, to]} | {sub: index}].
 function parseTags(src) {
     const heads = [];
     let head = null;
     let sub = null;
     const lines = String(src ?? "").split("\n");
-    const ensureHead = () => {
-        if (!head) { head = { title: null, line: 0, chips: [], subs: [] }; heads.push(head); }
+    const ensureHead = (i) => {
+        if (!head) { head = { title: null, line: i, chips: [], subs: [], order: [] }; heads.push(head); }
         return head;
+    };
+    const addChip = (hd, chip) => {
+        const last = hd.order[hd.order.length - 1];
+        if (last?.chips) last.chips[1]++;
+        else hd.order.push({ chips: [hd.chips.length, hd.chips.length + 1] });
+        hd.chips.push(chip);
     };
     lines.forEach((raw, i) => {
         const line = raw.trim();
         if (!line) return;
         let m;
-        if ((m = line.match(/^#(?!#)\s*(.*)$/))) {
-            head = { title: m[1].trim(), line: i, chips: [], subs: [] };
+        if (line === "/##" || line === "/#") {
+            if (sub) {
+                // "/#" ends the sub headline without a line of its own; the headline's line marks it
+                sub.end = line === "/##" ? i + 1 : i;
+                if (line === "/##") sub.closeLine = i;
+                sub = null;
+            }
+            if (line === "/#" && head && head.title !== null) {
+                head.closeLine = i;
+                head.end = i + 1;
+                head = null;
+            }
+        } else if ((m = line.match(/^#(?!#)\s*(.*)$/))) {
+            if (sub && sub.end === undefined) sub.end = i;
+            head = { title: m[1].trim(), line: i, chips: [], subs: [], order: [] };
             heads.push(head);
             sub = null;
         } else if ((m = line.match(/^#{2,}\s*(.*)$/))) {
+            if (sub && sub.end === undefined) sub.end = i;
+            const hd = ensureHead(i);
             sub = { title: m[1].trim(), line: i, chips: [] };
-            ensureHead().subs.push(sub);
+            hd.order.push({ sub: hd.subs.length });
+            hd.subs.push(sub);
         } else {
             const chip = parseTagLine(line);
             chip.line = i;
-            if (chip.text) (sub ?? ensureHead()).chips.push(chip);
+            if (!chip.text) return;
+            if (sub) sub.chips.push(chip);
+            else addChip(ensureHead(i), chip);
         }
     });
     heads.forEach((hd, i) => {
-        hd.end = heads[i + 1]?.line ?? lines.length;
-        hd.subs.forEach((sb, j) => { sb.end = hd.subs[j + 1]?.line ?? hd.end; });
+        hd.end ??= heads[i + 1]?.line ?? lines.length;
+        hd.subs.forEach((sb, j) => { sb.end ??= hd.subs[j + 1]?.line ?? (hd.closeLine ?? hd.end); });
     });
     return heads;
 }
@@ -206,7 +287,7 @@ const copyFormat = (tab, text) => (tab.copyComma ? text + "," : text);
 // Flash "Copied" (or "Copy failed") over each element, fading in and back out.
 function flashCopied(els, ok) {
     for (const x of els) {
-        x.dataset.copied = ok ? "Copied" : "Copy failed";
+        x.dataset.copied = ok ? "Copied" : "Copy Failed";
         x.classList.add("is-copied");
         clearTimeout(x.tnTimer);
         x.tnTimer = setTimeout(() => x.classList.remove("is-copied"), 900);
@@ -220,8 +301,10 @@ const EXAMPLES = {
         "## Boots",
         "white PVC fold-over cuff ankle boots",
         "stiletto heels | very thin, high heels",
-        "## Dress",
+        "/##",
         "pink halterneck dress",
+        "/#",
+        "sharp focus",
         "# Camera",
         "**Camera:** Shot on an 85mm lens, sharp focus, bokeh",
     ].join("\n"),
@@ -260,7 +343,7 @@ const ICONS = ["📝", "⭐", "📌", "💡", "⚠️", "✅", "❌", "❓", "�
 const TYPES = [
     { id: "plain", label: "Plain" },
     { id: "markdown", label: "Markdown" },
-    { id: "tags", label: "Tag list" },
+    { id: "tags", label: "Tag List" },
 ];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -385,6 +468,8 @@ function placeMenu(m, x, y) {
  *   { label, submenu: () => items }      flyout opened on hover or click
  *   { sep: true }
  *   { heading: text }                    a title line, not clickable
+ *   { note: text }                       a short greyed explanation, not clickable
+ * Items can also have `icon` (shown in the tick column) and `onContext(e)` (right-click).
  *   { swatches: current, onPick(color) }
  *   { icons: current, onPick(icon) }
  *   { input: value, placeholder, onSubmit(value) }
@@ -400,6 +485,8 @@ function buildMenu(items, accent, isSub) {
             m.append(h("div", "tn-menu-sep"));
         } else if (it.heading !== undefined) {
             m.append(h("div", "tn-menu-heading", { text: it.heading }));
+        } else if (it.note !== undefined) {
+            m.append(h("div", "tn-menu-note", { text: it.note }));
         } else if (it.swatches !== undefined) {
             const row = h("div", "tn-swatches");
             for (const c of PALETTE) {
@@ -408,7 +495,7 @@ function buildMenu(items, accent, isSub) {
                     onclick: () => { it.onPick(c); closeMenu(); },
                 }));
             }
-            const custom = h("label", "tn-swatch tn-swatch-custom", { title: "Custom colour" });
+            const custom = h("label", "tn-swatch tn-swatch-custom", { title: "Custom Colour" });
             const picker = h("input", "", { type: "color" });
             picker.value = /^#[0-9a-f]{6}$/i.test(it.swatches) ? it.swatches : "#888888";
             picker.addEventListener("input", () => it.onPick(picker.value));
@@ -441,7 +528,9 @@ function buildMenu(items, accent, isSub) {
             requestAnimationFrame(() => { inp.focus(); inp.select(); });
         } else {
             const b = h("button", "tn-menu-item" + (it.danger ? " is-danger" : "") + (it.submenu ? " has-sub" : ""), { role: "menuitem" });
-            b.append(h("span", "tn-check", { text: it.checked ? "✓" : "" }), h("span", "tn-menu-label", { text: it.label }));
+            b.append(h("span", "tn-check" + (it.icon && !it.checked ? " is-icon" : ""), { text: it.checked ? "✓" : it.icon ?? "" }), h("span", "tn-menu-label", { text: it.label }));
+            if (it.title) b.title = it.title;
+            if (it.onContext) b.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); it.onContext(e); });
             if (it.hint) b.append(h("span", "tn-menu-hint", { text: it.hint }));
             if (it.submenu) b.append(h("span", "tn-menu-arrow", { text: "▸" }));
             if (it.disabled) b.disabled = true;
@@ -487,15 +576,59 @@ function showMenu(x, y, items, accent) {
 // so a bubbling listener would never hear Esc while focus is inside the note.
 addEventListener("keydown", (e) => { if (e.key === "Escape" && openMenu) closeMenu(); }, true);
 
-// Mouse wheel over something in a note that has more to scroll (a long tag list, markdown note,
-// text or tab strip) scrolls it. In Nodes 2.0 the canvas catches every wheel on its way down to
-// the node and zooms instead, so this listens at the window, before the canvas. Nothing is
-// prevented, so the browser scrolls as normal. Ctrl+wheel still zooms, and a note with nothing
-// to scroll leaves the wheel to the canvas.
+// Middle-click on a tab closes it. Caught at the window, before the canvas or a Nodes 2.0 node
+// can take the press (to pan), and finished when the button comes up over the same tab.
+let middleTab = null;
+const middleTarget = (e) => (e.button === 1 ? e.target.closest?.(".tn-tab") : null);
+addEventListener("pointerdown", (e) => {
+    const el = middleTarget(e);
+    if (!el?.tnMiddle) return;
+    e.preventDefault(); e.stopPropagation();
+    middleTab = el;
+}, true);
+addEventListener("mousedown", (e) => { if (middleTarget(e)?.tnMiddle) { e.preventDefault(); e.stopPropagation(); } }, true);
+addEventListener("pointerup", (e) => {
+    if (e.button !== 1 || !middleTab) return;
+    const el = middleTab;
+    middleTab = null;
+    e.preventDefault(); e.stopPropagation();
+    if (el.isConnected && document.elementFromPoint(e.clientX, e.clientY)?.closest(".tn-tab") === el) el.tnMiddle(e);
+}, true);
+addEventListener("auxclick", (e) => { if (middleTarget(e)?.tnMiddle) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+// Mouse wheel over a note. Listens at the window, before the canvas, because in Nodes 2.0 the
+// canvas catches every wheel on its way down to the node and zooms.
+// - Over something with more to scroll (a long tag list, markdown note, text or tab strip): it
+//   scrolls. Nothing is prevented, so the browser scrolls as normal.
+// - Shift+wheel in a tag list scrolls it up and down (browsers treat Shift+wheel as sideways
+//   scrolling, which a tag list never does), so Shift-clicking can go on further down the list.
+// - Otherwise (Ctrl+wheel, or nothing to scroll) the wheel belongs to the canvas, like
+//   ComfyUI's own text boxes. Nodes 2.0 hands it over itself; in classic mode the note sits on
+//   top of the canvas, so the note hands it over the same way ComfyUI's text box does.
 addEventListener("wheel", (e) => {
-    if (e.ctrlKey || e.metaKey) return;
     const root = e.target?.closest?.(".tn-root");
     if (!root) return;
+    const toCanvas = () => {
+        if (root.closest("[data-node-id]")) return; // Nodes 2.0 forwards it already
+        e.preventDefault();
+        e.stopPropagation();
+        app.canvas?.processMouseWheel?.(e);
+    };
+    if (e.ctrlKey || e.metaKey) { toCanvas(); return; }
+    const tags = e.shiftKey ? e.target.closest(".tn-tags") : null;
+    if (tags && root.contains(tags)) {
+        if (tags.scrollHeight > tags.clientHeight + 1) {
+            // Some systems report Shift+wheel as sideways movement (deltaX), others as deltaY.
+            const d = e.deltaY || e.deltaX;
+            const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? tags.clientHeight : 1;
+            tags.scrollTop += d * unit;
+            e.preventDefault();
+            e.stopPropagation();
+        } else {
+            toCanvas();
+        }
+        return;
+    }
     for (let el = e.target; el && root.contains(el); el = el.parentElement) {
         const oy = getComputedStyle(el).overflowY;
         if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight + 1) {
@@ -503,7 +636,8 @@ addEventListener("wheel", (e) => {
             return;
         }
     }
-}, { capture: true, passive: true });
+    toCanvas();
+}, { capture: true, passive: false }); // not passive: some wheels are redirected
 
 // ---------- UI controller ----------
 class TabbedNoteUI {
@@ -513,10 +647,18 @@ class TabbedNoteUI {
         this.ac = null;       // pysssss autocomplete attached to the current editor
         this.sel = [];        // Shift-click selection: [{key, text}] in click order
         this.selTab = null;   // tab the selection belongs to
+        // Outlined chips (right-click), per tab, in the order they were outlined. Not saved with
+        // the workflow. Each entry remembers the tab's text when it was made: if the text changes
+        // (editing, moving tags), the positions no longer match, so that tab's outlines are dropped.
+        // tabId -> { content, items: [{key, text}], comma, underscore }
+        this.outlines = new Map();
         this.root = h("div", "tn-root");
         this.strip = h("div", "tn-strip");
+        this.main = h("div", "tn-main");
+        this.applyBar = this.buildApplyBar();
         this.body = h("div", "tn-body");
-        this.root.append(this.strip, this.body);
+        this.main.append(this.applyBar, this.body);
+        this.root.append(this.strip, this.main);
         this.root.addEventListener("keydown", stopKeys);
         // Focus rings only for keyboard use: mouse clicks hide them, the Tab key brings them back.
         this.root.dataset.input = "pointer";
@@ -528,11 +670,13 @@ class TabbedNoteUI {
             if (e.target.closest?.("textarea, input, [contenteditable=true]")) e.stopPropagation();
         });
         // Dropping on empty strip space: ungroup and move to the end.
-        this.strip.addEventListener("dragover", (e) => { if (this.dragId) e.preventDefault(); });
+        // Dropping a group there moves it to the end.
+        this.strip.addEventListener("dragover", (e) => { if (this.dragId || this.dragGroup) e.preventDefault(); });
         this.strip.addEventListener("drop", (e) => {
-            if (!this.dragId || e.target !== this.strip) return;
+            if (e.target !== this.strip) return;
             e.preventDefault();
-            this.moveTab(this.dragId, null, false, null);
+            if (this.dragId) this.moveTab(this.dragId, null, false, null);
+            else if (this.dragGroup) this.moveGroup(this.dragGroup, null);
         });
     }
 
@@ -572,9 +716,13 @@ class TabbedNoteUI {
 
         const tools = h("div", "tn-tools");
         tools.append(
-            h("button", "tn-tool", { text: "+", title: "New tab", "aria-label": "New tab", onclick: () => this.addTab() }),
             h("button", "tn-tool", {
-                text: "⋯", title: "Note options", "aria-label": "Note options",
+                text: "+", title: "New Tab: Right-click for Stored Tabs.", "aria-label": "New Tab",
+                onclick: () => this.addTab(),
+                oncontextmenu: (e) => { e.preventDefault(); e.stopPropagation(); this.storedMenu(e); },
+            }),
+            h("button", "tn-tool", {
+                text: "⋯", title: "Note Options", "aria-label": "Note Options",
                 onclick: (e) => this.nodeMenu(e),
             }),
         );
@@ -590,7 +738,7 @@ class TabbedNoteUI {
         if (g.collapsed && tabs.some((t) => t.id === s.active)) wrap.classList.add("has-active");
 
         const head = h("button", "tn-group-head", {
-            title: `${g.name} — click to ${g.collapsed ? "expand" : "collapse"}, right-click for options`,
+            title: `${g.name}: Click to ${g.collapsed ? "expand" : "collapse"}, right-click for options.`,
         });
         head.append(
             h("span", "tn-chev", { text: g.collapsed ? "▸" : "▾" }),
@@ -599,11 +747,42 @@ class TabbedNoteUI {
         if (g.collapsed) head.append(h("span", "tn-group-count", { text: String(tabs.length) }));
         head.addEventListener("click", () => { g.collapsed = !g.collapsed; this.commit(); });
         head.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); this.groupMenu(e, g); });
-        head.addEventListener("dragover", (e) => { if (this.dragId) { e.preventDefault(); head.classList.add("is-drop"); } });
-        head.addEventListener("dragleave", () => head.classList.remove("is-drop"));
+        // Drag the label to move the group with its tabs.
+        head.draggable = true;
+        head.addEventListener("dragstart", (e) => {
+            this.dragGroup = g.id;
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", g.id);
+            wrap.classList.add("is-dragging");
+        });
+        head.addEventListener("dragend", () => { this.dragGroup = null; this.render(); });
+        // A dragged tab: near the label's start or end edge it goes before or after the group,
+        // in the middle it goes into the group. A dragged group goes before or after this one.
+        const zone = (e) => {
+            const r = head.getBoundingClientRect();
+            const [pos, size] = this.vertical ? [e.clientY - r.top, r.height] : [e.clientX - r.left, r.width];
+            if (this.dragGroup || !tabs.length) return this.dragGroup ? (pos > size / 2 ? "after" : "before") : "into";
+            const edge = Math.max(6, size * 0.25);
+            return pos < edge ? "before" : pos > size - edge ? "after" : "into";
+        };
+        const mark = (z) => {
+            head.classList.toggle("is-drop", z === "into");
+            wrap.classList.toggle("drop-before", z === "before");
+            wrap.classList.toggle("drop-after", z === "after");
+        };
+        head.addEventListener("dragover", (e) => {
+            if (!this.dragId && !(this.dragGroup && this.dragGroup !== g.id)) return;
+            e.preventDefault(); e.stopPropagation();
+            mark(zone(e));
+        });
+        head.addEventListener("dragleave", () => mark(null));
         head.addEventListener("drop", (e) => {
             e.preventDefault(); e.stopPropagation();
-            if (this.dragId) this.moveTab(this.dragId, null, false, g.id);
+            const z = zone(e);
+            mark(null);
+            if (this.dragGroup && this.dragGroup !== g.id) this.moveGroup(this.dragGroup, { group: g.id, after: z === "after" });
+            else if (this.dragId && z === "into") this.moveTab(this.dragId, null, false, g.id);
+            else if (this.dragId) this.placeBeside(this.dragId, g.id, z === "after");
         });
         wrap.append(head);
 
@@ -625,10 +804,10 @@ class TabbedNoteUI {
         el.append(h("span", "tn-icon", { text: tab.icon }));
         const title = h("span", "tn-title", { text: tab.title });
         el.append(title);
-        if (tab.type === "markdown") el.append(h("span", "tn-md-badge", { text: "M", title: "Markdown tab" }));
-        if (tab.type === "tags") el.append(h("span", "tn-md-badge", { text: "T", title: "Tag list tab" }));
+        if (tab.type === "markdown") el.append(h("span", "tn-md-badge", { text: "M", title: "Markdown Tab" }));
+        if (tab.type === "tags") el.append(h("span", "tn-md-badge", { text: "T", title: "Tag List Tab" }));
         if (s.outputTab === tab.id && s.io.outputs.includes("note")) {
-            el.append(h("span", "tn-md-badge tn-out-badge", { text: "Out", title: "Default text output tab" }));
+            el.append(h("span", "tn-md-badge tn-out-badge", { text: "Out", title: "Default Text Output Tab" }));
         }
 
         el.addEventListener("click", () => this.activate(tab.id));
@@ -654,18 +833,39 @@ class TabbedNoteUI {
             el.classList.add("is-dragging");
         });
         el.addEventListener("dragend", () => { this.dragId = null; this.render(); });
+        // A dragged group lands beside this tab, or beside the group this tab is in.
+        const groupMark = () => (tab.group ? el.closest(".tn-group") : el);
         el.addEventListener("dragover", (e) => {
+            if (this.dragGroup) {
+                if (tab.group === this.dragGroup) return;
+                e.preventDefault(); e.stopPropagation();
+                const after = this.isAfter(e, el), m = groupMark();
+                m.classList.toggle("drop-before", !after);
+                m.classList.toggle("drop-after", after);
+                return;
+            }
             if (!this.dragId || this.dragId === tab.id) return;
             e.preventDefault(); e.stopPropagation();
             const after = this.isAfter(e, el);
             el.classList.toggle("drop-before", !after);
             el.classList.toggle("drop-after", after);
         });
-        el.addEventListener("dragleave", () => el.classList.remove("drop-before", "drop-after"));
+        el.addEventListener("dragleave", () => {
+            el.classList.remove("drop-before", "drop-after");
+            if (this.dragGroup) groupMark()?.classList.remove("drop-before", "drop-after");
+        });
         el.addEventListener("drop", (e) => {
             e.preventDefault(); e.stopPropagation();
-            if (this.dragId && this.dragId !== tab.id) this.moveTab(this.dragId, tab.id, this.isAfter(e, el), tab.group);
+            const after = this.isAfter(e, el);
+            if (this.dragGroup && tab.group !== this.dragGroup) {
+                this.moveGroup(this.dragGroup, tab.group ? { group: tab.group, after } : { tab: tab.id, after });
+            } else if (this.dragId && this.dragId !== tab.id) this.moveTab(this.dragId, tab.id, after, tab.group);
         });
+
+        // Middle-click closes the tab (asking first if it has text). Stopping the press here also
+        // keeps the canvas from panning and the browser from starting auto-scroll.
+        // (Handled at the window: in Nodes 2.0 the node takes the press before it reaches the tab.)
+        el.tnMiddle = (e) => this.deleteTab(tab, e);
         return el;
     }
 
@@ -686,12 +886,16 @@ class TabbedNoteUI {
         hideTip();
         this.body.replaceChildren();
         if (!tab) {
-            this.body.append(h("button", "tn-empty", { text: "Add a tab to start writing", onclick: () => this.addTab() }));
+            this.updateApplyBar();
+            this.body.append(h("button", "tn-empty", { text: "Add a Tab to Start Writing", onclick: () => this.addTab() }));
             return;
         }
         this.body.style.setProperty("--tn-color", tab.color);
         // A Shift-click selection belongs to one tab's view; switching tabs or editing ends it.
         if (this.sel.length && (this.selTab !== tab.id || this.editing || tab.type !== "tags")) this.sel = [];
+        const ol = this.outlines.get(tab.id);
+        if (ol && (ol.content !== tab.content || tab.type !== "tags")) this.outlines.delete(tab.id);
+        this.updateApplyBar();
 
         // Markdown and tag list tabs show a view; double-click anywhere in it to edit.
         if (tab.type !== "plain" && !this.editing) {
@@ -705,7 +909,11 @@ class TabbedNoteUI {
             this.body.append(view);
             return;
         }
-        this.body.append(this.editor(tab));
+        const ed = this.editor(tab);
+        this.body.append(ed);
+        // Focus at once (not only on the next frame), so a key pressed straight after the
+        // double-click, such as Esc, reaches the editor.
+        if (tab.type !== "plain") ed.focus();
     }
 
     // Empty markdown and tag list tabs show a greyed example of how to write one.
@@ -720,7 +928,7 @@ class TabbedNoteUI {
 
     markdownView(tab) {
         if (!tab.content.trim()) return this.emptyExample("markdown", "tn-md");
-        const view = h("div", "tn-md", { title: "Double-click to edit" });
+        const view = h("div", "tn-md", { title: "Markdown Note: Double-click to edit." });
         view.innerHTML = renderMarkdown(tab.content);
         return view;
     }
@@ -731,9 +939,10 @@ class TabbedNoteUI {
         // No hover titles here: only tags with a description show a tooltip, straight away.
         const view = h("div", "tn-tags");
         const selected = new Set(this.sel.map((x) => x.key));
-        const chipRow = (chips, prefix) => {
+        const chipRow = (chips, prefix, start = 0) => {
             const row = h("div", "tn-chips");
-            chips.forEach((c, ci) => {
+            chips.forEach((c, i) => {
+                const ci = start + i;
                 const shown = chipText(tab, c);
                 const key = `${prefix}.${ci}`;
                 const chip = h("button", "tn-chip" + (selected.has(key) ? " is-selected" : ""), { text: shown });
@@ -748,13 +957,22 @@ class TabbedNoteUI {
                     chip.addEventListener("focus", () => showTip(chip, c.desc));
                     chip.addEventListener("blur", hideTip);
                 }
+                if (this.isOutlined(tab, key)) chip.classList.add("is-outlined");
                 chip.addEventListener("click", (e) => {
                     if (this.consumeDragClick()) return;
+                    // While the Apply row is open, clicks (with or without Shift) gather tags.
+                    if (this.outlines.has(tab.id)) { this.toggleOutline(tab, [{ key, text: c.text, el: chip }]); return; }
                     if (e.shiftKey) this.toggleSelected(tab, chip, key, shown);
                     else {
                         endSelection();
                         this.copyWithFeedback(chip, copyFormat(tab, shown));
                     }
+                });
+                // Right-click outlines the tag (instead of ComfyUI's node menu).
+                chip.addEventListener("contextmenu", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleOutline(tab, [{ key, text: c.text, el: chip }]);
                 });
                 row.append(chip);
             });
@@ -767,7 +985,7 @@ class TabbedNoteUI {
             const collapsed = head.title !== null && tab.collapsed.includes(key);
             if (head.title !== null) {
                 const hb = h("button", "tn-head-title", {
-                    title: collapsed ? "Click to expand" : "Click to collapse",
+                    title: `${head.title || "Untitled"}: Click to ${collapsed ? "expand" : "collapse"}.`,
                     "aria-expanded": String(!collapsed),
                 });
                 hb.append(h("span", "tn-chev", { text: collapsed ? "▸" : "▾" }), h("span", "", { text: head.title || "Untitled" }));
@@ -782,8 +1000,7 @@ class TabbedNoteUI {
                 sec.append(hb);
             }
             if (!collapsed) {
-                if (head.chips.length) sec.append(chipRow(head.chips, `${hi}.h`));
-                head.subs.forEach((sub, si) => {
+                const renderSub = (sub, si) => {
                     // A sub headline's section: a coloured bar down its left side, from the title
                     // to its last tag. The arrow collapses it; clicking the name copies its tags.
                     // Collapsed sub headlines are remembered by headline + sub headline name.
@@ -804,7 +1021,7 @@ class TabbedNoteUI {
                     });
                     const sb = h("button", "tn-sub-title", {
                         text: sub.title || "Untitled",
-                        title: sub.chips.length ? "Click to copy all of these tags" : "No tags to copy",
+                        title: `${sub.title || "Untitled"}: ${sub.chips.length ? "Click to copy all of its tags." : "No tags to copy."}`,
                     });
                     sb.dataset.drag = "sub";
                     sb.dataset.key = `${hi}.${si}`;
@@ -815,6 +1032,12 @@ class TabbedNoteUI {
                     if (sub.chips.length) {
                         const row = chipRow(sub.chips, `${hi}.${si}`);
                         const all = copyFormat(tab, sub.chips.map((c) => chipText(tab, c)).join(", "));
+                        sb.addEventListener("contextmenu", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const els = subCollapsed ? [] : [...row.children];
+                            this.toggleOutline(tab, sub.chips.map((c, ci) => ({ key: `${hi}.${si}.${ci}`, text: c.text, el: els[ci] })), true);
+                        });
                         sb.addEventListener("click", () => {
                             if (this.consumeDragClick()) return;
                             endSelection();
@@ -828,7 +1051,17 @@ class TabbedNoteUI {
                         sb.classList.add("is-empty");
                         sb.setAttribute("aria-disabled", "true");
                     }
-                });
+                    // Closed with "/##": a faint dashed line from the sub headline's indent.
+                    if (sub.closeLine !== undefined && !subCollapsed) box.append(h("div", "tn-close", { title: "End of " + (sub.title || "Untitled") }));
+                };
+                // Tags and sub headlines in the order they were written, so tags after a closed
+                // sub headline ("/##") show after it, back at the headline's level.
+                for (const part of head.order) {
+                    if (part.sub !== undefined) renderSub(head.subs[part.sub], part.sub);
+                    else sec.append(chipRow(head.chips.slice(part.chips[0], part.chips[1]), `${hi}.h`, part.chips[0]));
+                }
+                // Closed with "/#": a faint dashed line from the headline's indent.
+                if (head.closeLine !== undefined) sec.append(h("div", "tn-close", { title: "End of " + (head.title || "Untitled") }));
             } else {
                 sec.classList.add("is-collapsed");
             }
@@ -836,6 +1069,110 @@ class TabbedNoteUI {
         });
         view.addEventListener("pointerdown", (e) => this.startTagDrag(e, tab, heads));
         return view;
+    }
+
+    // ----- outlines (right-click) and the Apply / Discard row -----
+    isOutlined(tab, key) {
+        return !!this.outlines.get(tab.id)?.items.some((x) => x.key === key);
+    }
+
+    // Toggle tags in or out of this tab's outlines. With `group` (a sub headline), all are
+    // outlined unless all already are, in which case all are removed.
+    toggleOutline(tab, chips, group = false) {
+        endSelection();
+        let ol = this.outlines.get(tab.id);
+        if (!ol) {
+            // The row's Comma and Underscore toggles start from the tab's own copy options.
+            ol = { content: tab.content, items: [], comma: tab.copyComma, underscore: tab.copyUnderscore };
+            this.outlines.set(tab.id, ol);
+        }
+        const has = (k) => ol.items.some((x) => x.key === k);
+        const removeAll = group ? chips.every((c) => has(c.key)) : null;
+        for (const c of chips) {
+            const on = group ? !removeAll : !has(c.key);
+            if (on && !has(c.key)) ol.items.push({ key: c.key, text: c.text });
+            if (!on) ol.items = ol.items.filter((x) => x.key !== c.key);
+            c.el?.classList.toggle("is-outlined", on);
+        }
+        if (!ol.items.length) this.outlines.delete(tab.id);
+        this.updateApplyBar();
+    }
+
+    buildApplyBar() {
+        const bar = h("div", "tn-apply", { "aria-hidden": "true" });
+        const inner = h("div", "tn-apply-inner");
+        const toggle = (label, key, title) => {
+            const b = h("button", "tn-apply-toggle", { text: label, title, "aria-pressed": "false" });
+            b.addEventListener("click", () => {
+                const ol = this.currentOutlines();
+                if (!ol) return;
+                ol[key] = !ol[key];
+                this.updateApplyBar();
+            });
+            return b;
+        };
+        this.applyComma = toggle("Comma", "comma", "Comma: Adds a comma to this copy only.");
+        this.applyUnderscore = toggle("Underscore", "underscore", "Underscore: Uses underscores in this copy only.");
+        this.applyCount = h("span", "tn-apply-count");
+        const discard = h("button", "tn-apply-btn", { text: "Discard", title: "Discard: Removes all outlines without copying." });
+        const apply = h("button", "tn-apply-btn is-primary", { text: "Apply", title: "Apply: Copies all outlined tags." });
+        discard.addEventListener("click", () => this.discardOutlines());
+        apply.addEventListener("click", () => this.applyOutlines());
+        // inner clips while the row slides; content holds the padding, so a shut row takes no space
+        const content = h("div", "tn-apply-content");
+        content.append(this.applyComma, this.applyUnderscore, this.applyCount, h("span", "tn-apply-gap"), discard, apply);
+        inner.append(content);
+        bar.append(inner);
+        return bar;
+    }
+
+    currentOutlines() {
+        const s = this.s;
+        const tab = s.tabs.find((t) => t.id === s.active);
+        return tab && tab.type === "tags" ? this.outlines.get(tab.id) ?? null : null;
+    }
+
+    // The row shows only on a tag list tab that has outlines. It slides open and shut; the
+    // content area below gives up (and gets back) the space, and the node never changes size.
+    updateApplyBar() {
+        const ol = this.currentOutlines();
+        const open = !!ol;
+        this.applyBar.classList.toggle("is-open", open);
+        this.applyBar.setAttribute("aria-hidden", String(!open));
+        for (const b of this.applyBar.querySelectorAll("button")) b.tabIndex = open ? 0 : -1;
+        if (!ol) return;
+        const tab = this.s.tabs.find((t) => t.id === this.s.active);
+        this.applyBar.style.setProperty("--tn-color", tab.color);
+        this.applyComma.classList.toggle("is-on", ol.comma);
+        this.applyComma.setAttribute("aria-pressed", String(ol.comma));
+        this.applyUnderscore.classList.toggle("is-on", ol.underscore);
+        this.applyUnderscore.setAttribute("aria-pressed", String(ol.underscore));
+        this.applyCount.textContent = `${ol.items.length} tag${ol.items.length === 1 ? "" : "s"} outlined`;
+    }
+
+    async applyOutlines() {
+        const ol = this.currentOutlines();
+        if (!ol) return;
+        const tab = this.s.tabs.find((t) => t.id === this.s.active);
+        // Format with the row's toggles, which may differ from the tab's own settings.
+        const fmt = { copyUnderscore: ol.underscore, copyComma: ol.comma };
+        const text = copyFormat(fmt, ol.items.map((x) => chipText(fmt, x.text)).join(", "));
+        const els = ol.items
+            .map((x) => this.body.querySelector(`.tn-chip[data-key="${x.key}"]`))
+            .filter(Boolean);
+        this.outlines.delete(tab.id);
+        for (const el of els) el.classList.remove("is-outlined");
+        this.updateApplyBar();
+        flashCopied(els, await copyText(text));
+    }
+
+    discardOutlines() {
+        const ol = this.currentOutlines();
+        if (!ol) return;
+        const tab = this.s.tabs.find((t) => t.id === this.s.active);
+        this.outlines.delete(tab.id);
+        for (const el of this.body.querySelectorAll(".tn-chip.is-outlined")) el.classList.remove("is-outlined");
+        this.updateApplyBar();
     }
 
     // ----- Ctrl+drag to move tags, sub headlines and headlines -----
@@ -951,10 +1288,10 @@ class TabbedNoteUI {
         showMenu(ev.clientX, ev.clientY, [
             { heading: `Move "${name}"` },
             {
-                label: item.kind === "head" ? "With its sub headlines and tags" : "With its tags",
+                label: item.kind === "head" ? "With Its Sub Headlines and Tags" : "With Its Tags",
                 action: () => apply(item.node.end - item.node.line),
             },
-            { label: item.kind === "head" ? "Just the headline" : "Just the sub headline", action: () => apply(1) },
+            { label: item.kind === "head" ? "Just the Headline" : "Just the Sub Headline", action: () => apply(1) },
             { sep: true },
             { label: "Cancel" },
         ], getComputedStyle(item.el).getPropertyValue("--tn-color"));
@@ -1116,9 +1453,56 @@ class TabbedNoteUI {
         this.commit();
     }
 
-    deleteTab(tab) {
-        if (tab.content.trim() && !confirm(`Delete the tab "${tab.title}" and its text?`)) return;
-        this.removeTab(tab);
+    // Delete Tab and middle-click: an empty tab goes at once; one with text asks first.
+    deleteTab(tab, e) {
+        const go = () => { this.removeTab(tab); this.commit(); };
+        if (!tab.content.trim()) return go();
+        this.confirmMenu(e, `Delete "${tab.title}"?`, "Its text will be lost.", "Delete", go, tab.color);
+    }
+
+    // A small warning at the pointer, inside the note's own menus instead of a browser pop-up.
+    confirmMenu(e, heading, text, label, onYes, accent) {
+        showMenu(e.clientX, e.clientY, [
+            { heading }, { note: text },
+            { label, danger: true, action: onYes },
+            { sep: true },
+            { label: "Cancel" },
+        ], accent);
+    }
+
+    // Put a tab just before or after a group, outside it.
+    placeBeside(id, gid, after) {
+        const s = this.s;
+        const inGroup = s.tabs.filter((t) => t.group === gid && t.id !== id);
+        if (!inGroup.length) return this.moveTab(id, null, false, null);
+        const ref = after ? inGroup[inGroup.length - 1] : inGroup[0];
+        this.moveTab(id, ref.id, after, null);
+    }
+
+    // Move a group, with all its tabs, before or after a tab ({ tab, after }) or a group
+    // ({ group, after }), or to the end (null). Groups never go inside groups.
+    moveGroup(gid, to) {
+        const s = this.s;
+        this.dragGroup = null;
+        const block = s.tabs.filter((t) => t.group === gid);
+        const rest = s.tabs.filter((t) => t.group !== gid);
+        let j = rest.length;
+        if (to?.tab) {
+            const i = rest.findIndex((t) => t.id === to.tab);
+            if (i >= 0) j = i + (to.after ? 1 : 0);
+        } else if (to?.group) {
+            const idx = rest.map((t, i) => (t.group === to.group ? i : -1)).filter((i) => i >= 0);
+            if (idx.length) j = to.after ? idx[idx.length - 1] + 1 : idx[0];
+        }
+        rest.splice(j, 0, ...block);
+        s.tabs = rest;
+        // Keep the group list in the same order, so empty groups (shown last) also move.
+        if (to?.group) {
+            const g = s.groups.find((x) => x.id === gid);
+            s.groups = s.groups.filter((x) => x !== g);
+            const k = s.groups.findIndex((x) => x.id === to.group);
+            s.groups.splice(k < 0 ? s.groups.length : k + (to.after ? 1 : 0), 0, g);
+        }
         this.commit();
     }
 
@@ -1235,17 +1619,19 @@ class TabbedNoteUI {
     }
 
     // ----- menus -----
+    // Opens at once using the last-read Stored Tabs folders, and refreshes them in the background.
     tabMenu(e, tab) {
+        loadLibrary();
         const s = this.s;
         const toggle = (key) => () => { tab[key] = !tab[key]; this.commit(); };
         const groupItems = () => [
-            { label: "No group", checked: !tab.group, action: () => this.moveTab(tab.id, null, false, null) },
+            { label: "No Group", checked: !tab.group, action: () => this.moveTab(tab.id, null, false, null) },
             ...s.groups.map((g) => ({
                 label: g.name, checked: tab.group === g.id,
                 action: () => this.moveTab(tab.id, null, false, g.id),
             })),
             { sep: true },
-            { label: "New group with this tab", action: () => {
+            { label: "New Group with This Tab", action: () => {
                 const g = this.addGroup();
                 this.moveTab(tab.id, null, false, g.id);
             } },
@@ -1255,37 +1641,37 @@ class TabbedNoteUI {
         }));
         const items = [
             { label: "Rename…", action: () => { this.renameMenu(e, tab.title, (v) => { if (v) { tab.title = v; this.commit(); } }); return "keep"; } },
-            { label: "Change icon…", action: () => { this.iconMenu(e, tab); return "keep"; } },
+            { label: "Change Icon…", action: () => { this.iconMenu(e, tab); return "keep"; } },
             { swatches: tab.color, onPick: (c) => { tab.color = c; this.commit(); } },
             { sep: true },
-            { label: "Tab type", hint: TYPES.find((t) => t.id === tab.type).label, submenu: typeItems },
+            { label: "Tab Type", hint: TYPES.find((t) => t.id === tab.type).label, submenu: typeItems },
         ];
         if (tab.type === "tags") {
             items.push(
-                { label: "Add comma when copying", checked: tab.copyComma, action: toggle("copyComma") },
-                { label: "Use underscores", checked: tab.copyUnderscore, action: toggle("copyUnderscore") },
+                { label: "Add Comma when Copying", checked: tab.copyComma, action: toggle("copyComma") },
+                { label: "Use Underscores", checked: tab.copyUnderscore, action: toggle("copyUnderscore") },
             );
         }
         items.push(
-            { label: "Spell check", checked: tab.spellcheck, action: toggle("spellcheck") },
+            { label: "Spell Check", checked: tab.spellcheck, action: toggle("spellcheck") },
             acAvailable === false
-                ? { label: "Autocomplete", hint: "needs pysssss", disabled: true }
+                ? { label: "Autocomplete", hint: "Needs pysssss", disabled: true }
                 : { label: "Autocomplete", checked: tab.autocomplete, action: toggle("autocomplete") },
         );
         if (s.io.outputs.includes("note")) {
             const isOut = s.outputTab === tab.id;
             items.push({
-                label: "Default text output tab", checked: isOut,
-                hint: tab.type === "plain" || isOut ? "" : "Plain only",
+                label: "Default Text Output Tab", checked: isOut,
+                hint: tab.type === "plain" || isOut ? "" : "Plain Only",
                 disabled: tab.type !== "plain" && !isOut,
                 action: () => { s.outputTab = isOut ? null : tab.id; this.commit(); },
             });
         }
         items.push(
             { sep: true },
-            { label: "Move to group", submenu: groupItems },
-            { label: this.vertical ? "Move up" : "Move left", disabled: s.tabs[0] === tab, action: () => this.shiftTab(tab, -1) },
-            { label: this.vertical ? "Move down" : "Move right", disabled: s.tabs.at(-1) === tab, action: () => this.shiftTab(tab, 1) },
+            { label: "Move to Group", submenu: groupItems },
+            { label: this.vertical ? "Move Up" : "Move Left", disabled: s.tabs[0] === tab, action: () => this.shiftTab(tab, -1) },
+            { label: this.vertical ? "Move Down" : "Move Right", disabled: s.tabs.at(-1) === tab, action: () => this.shiftTab(tab, 1) },
             { label: "Duplicate", action: () => {
                 const copy = { ...tab, id: uid(), title: tab.title + " copy", collapsed: [...tab.collapsed] };
                 delete copy.generated; // a copy is the user's own tab, never auto-removed
@@ -1294,10 +1680,177 @@ class TabbedNoteUI {
                 this.editing = false;
                 this.commit();
             } },
+            libCache !== null
+                ? { label: "Store Tab", submenu: () => this.storeItems(e, tab, libCache ?? { tabs: [] }) }
+                : { label: "Store Tab", hint: "Unavailable", disabled: true, title: "Store Tab: The Stored Tabs library couldn't be read." },
             { sep: true },
-            { label: "Delete tab", danger: true, action: () => this.deleteTab(tab) },
+            { label: "Delete Tab", danger: true, action: () => this.deleteTab(tab, e) },
         );
         showMenu(e.clientX, e.clientY, items, tab.color);
+    }
+
+    // ----- Stored Tabs -----
+    // Store Tab ▸ : No Folder, the folders, New Folder…
+    storeItems(e, tab, lib) {
+        const folders = libFolders(lib);
+        return [
+            { label: "No Folder", action: () => this.storeTab(e, tab, null) },
+            ...folders.map((f) => ({ label: f, icon: "📁", action: () => this.storeTab(e, tab, f) })),
+            { sep: true },
+            { label: "New Folder…", action: () => { this.askName(e, "Folder Name", "", (f) => f && this.storeTab(e, tab, f)); return "keep"; } },
+        ];
+    }
+
+    async storeTab(e, tab, folder) {
+        try {
+            await this.storeTabInner(e, tab, folder);
+        } catch (err) {
+            console.warn("[TabbedNote] Couldn't store the tab.", err);
+            this.notice(e, "Stored Tabs Not Saved", "The tab couldn't be stored.");
+        }
+    }
+
+    async storeTabInner(e, tab, folder) {
+        const lib = await loadLibrary();
+        if (!lib) return this.notice(e, "Stored Tabs Unavailable", "The Stored Tabs library couldn't be read, so nothing was stored.");
+        const entry = { id: uid(), name: tab.title, folder: folder ?? null, tab: snapshotTab(tab) };
+        const same = lib.tabs.find((t) => t.name === entry.name && (t.folder ?? null) === entry.folder);
+        const save = async () => {
+            try {
+                await saveLibrary(lib);
+                this.flashTab(tab, "Stored");
+            } catch (err) {
+                console.warn("[TabbedNote] Couldn't save Stored Tabs.", err);
+                this.notice(e, "Stored Tabs Not Saved", "The Stored Tabs library couldn't be saved.");
+            }
+        };
+        if (!same) { lib.tabs.push(entry); return save(); }
+        // Same name in that folder: Replace, Keep Both or Cancel.
+        showMenu(e.clientX, e.clientY, [
+            { heading: `"${entry.name}" Is Already Stored${entry.folder ? ` in ${entry.folder}` : ""}` },
+            { label: "Replace", action: () => { same.tab = entry.tab; save(); } },
+            { label: "Keep Both", action: () => {
+                let n = 2;
+                while (lib.tabs.some((t) => t.name === `${entry.name} (${n})` && (t.folder ?? null) === entry.folder)) n++;
+                entry.name = `${entry.name} (${n})`;
+                lib.tabs.push(entry);
+                save();
+            } },
+            { sep: true },
+            { label: "Cancel" },
+        ], tab.color);
+    }
+
+    // Right-click on +: the Stored Tabs, folders first (as submenus), then the ones in no folder.
+    async storedMenu(e) {
+        const at = { clientX: e.clientX, clientY: e.clientY };
+        const lib = await loadLibrary();
+        if (!lib) return this.notice(at, "Stored Tabs Unavailable", "The Stored Tabs library couldn't be read.");
+        const item = (entry) => ({
+            label: entry.name, icon: entry.tab.icon, hint: TYPES.find((t) => t.id === entry.tab.type)?.label ?? "",
+            title: `${entry.name}: Click to add a copy. Right-click to rename, move, update or delete it.`,
+            action: () => this.addStoredCopy(entry),
+            onContext: (ev) => this.manageStored(ev, entry),
+        });
+        const items = [{ heading: "Stored Tabs" }];
+        if (!lib.tabs.length) {
+            items.push({ note: "None yet. Right-click a tab and choose Store Tab to add one." });
+        } else {
+            for (const f of libFolders(lib)) {
+                items.push({ label: f, icon: "📁", submenu: () => lib.tabs.filter((t) => t.folder === f).sort(byName).map(item) });
+            }
+            const loose = lib.tabs.filter((t) => !t.folder).sort(byName);
+            if (loose.length && libFolders(lib).length) items.push({ sep: true });
+            items.push(...loose.map(item));
+        }
+        showMenu(at.clientX, at.clientY, items);
+    }
+
+    addStoredCopy(entry) {
+        const s = this.s;
+        const t = newTab(s, { ...plainCopy(entry.tab), title: entry.name, group: null });
+        s.tabs.push(t);
+        s.active = t.id;
+        this.editing = false;
+        this.commit();
+    }
+
+    // Right-click on a Stored Tab in the + menu: Rename…, Move to Folder, Update from Open Tab, Delete.
+    manageStored(e, entry) {
+        const at = { clientX: e.clientX, clientY: e.clientY };
+        // Every change re-reads the library and finds the entry again, in case it changed elsewhere.
+        const change = async (fn) => {
+            const lib = await loadLibrary();
+            const cur = lib?.tabs.find((t) => t.id === entry.id);
+            if (!cur) return this.notice(at, "Stored Tab Not Found", "It may have been changed or deleted in another note.");
+            if (fn(lib, cur) === false) return;
+            try { await saveLibrary(lib); } catch (err) {
+                console.warn("[TabbedNote] Couldn't save Stored Tabs.", err);
+                this.notice(at, "Stored Tabs Not Saved", "The Stored Tabs library couldn't be saved.");
+            }
+        };
+        const folderItems = () => [
+            { label: "No Folder", checked: !entry.folder, action: () => change((l, c) => { c.folder = null; }) },
+            ...loadedFolders.map((f) => ({ label: f, icon: "📁", checked: entry.folder === f, action: () => change((l, c) => { c.folder = f; }) })),
+            { sep: true },
+            { label: "New Folder…", action: () => { this.askName(at, "Folder Name", "", (f) => f && change((l, c) => { c.folder = f; })); return "keep"; } },
+        ];
+        let loadedFolders = [];
+        loadLibrary().then((lib) => {
+            loadedFolders = lib ? libFolders(lib) : [];
+            const open = this.s.tabs.find((t) => t.id === this.s.active);
+            showMenu(at.clientX, at.clientY, [
+                { heading: entry.name },
+                { label: "Rename…", action: () => { this.askName(at, "Name", entry.name, (v) => v && change((l, c) => { c.name = v; })); return "keep"; } },
+                { label: "Move to Folder", submenu: folderItems },
+                {
+                    label: "Update from Open Tab", disabled: !open,
+                    title: "Update from Open Tab: Replaces this Stored Tab's contents with the open tab's, keeping its name and folder.",
+                    action: () => {
+                        showMenu(at.clientX, at.clientY, [
+                            { heading: `Update "${entry.name}" from "${open.title}"?` },
+                            { label: "Update", action: () => change((l, c) => { c.tab = snapshotTab(open); }) },
+                            { sep: true },
+                            { label: "Cancel" },
+                        ]);
+                        return "keep";
+                    },
+                },
+                { sep: true },
+                {
+                    label: "Delete", danger: true,
+                    action: () => {
+                        showMenu(at.clientX, at.clientY, [
+                            { heading: `Delete "${entry.name}" from Stored Tabs?` },
+                            { label: "Delete", danger: true, action: () => change((l) => { l.tabs = l.tabs.filter((t) => t.id !== entry.id); }) },
+                            { sep: true },
+                            { label: "Cancel" },
+                        ]);
+                        return "keep";
+                    },
+                },
+            ]);
+        });
+    }
+
+    // A small text-box menu (names, folder names).
+    askName(e, placeholder, value, onSubmit) {
+        showMenu(e.clientX, e.clientY, [{ input: value, placeholder, onSubmit }]);
+    }
+
+    // A short message in a menu-style notice.
+    notice(e, heading, text) {
+        showMenu(e.clientX, e.clientY, [{ heading }, { note: text }]);
+    }
+
+    // Briefly show a word ("Stored") over a tab, the same way chips show "Copied".
+    flashTab(tab, word) {
+        const el = this.strip.querySelector(`.tn-tab[data-id="${tab.id}"]`);
+        if (!el) return;
+        el.dataset.copied = word;
+        el.classList.add("is-copied");
+        clearTimeout(el.tnTimer);
+        el.tnTimer = setTimeout(() => el.classList.remove("is-copied"), 900);
     }
 
     groupMenu(e, g) {
@@ -1306,19 +1859,23 @@ class TabbedNoteUI {
             { label: "Rename…", action: () => { this.renameMenu(e, g.name, (v) => { if (v) { g.name = v; this.commit(); } }); return "keep"; } },
             { swatches: g.color, onPick: (c) => { g.color = c; this.commit(); } },
             { sep: true },
-            { label: "Add tab to group", action: () => this.addTab(g.id) },
+            { label: "Add Tab to Group", action: () => this.addTab(g.id) },
             { label: g.collapsed ? "Expand" : "Collapse", action: () => { g.collapsed = !g.collapsed; this.commit(); } },
-            { label: "Ungroup (keep tabs)", action: () => {
+            { label: "Ungroup (Keep Tabs)", action: () => {
                 for (const t of s.tabs) if (t.group === g.id) t.group = null;
                 s.groups = s.groups.filter((x) => x !== g);
                 this.commit();
             } },
-            { label: "Delete group and its tabs", danger: true, action: () => {
+            { label: "Delete Group and Its Tabs", danger: true, action: () => {
                 const n = s.tabs.filter((t) => t.group === g.id).length;
-                if (n && !confirm(`Delete "${g.name}" and its ${n} tab(s)?`)) return;
-                s.tabs = s.tabs.filter((t) => t.group !== g.id);
-                s.groups = s.groups.filter((x) => x !== g);
-                this.commit();
+                const go = () => {
+                    s.tabs = s.tabs.filter((t) => t.group !== g.id);
+                    if (!s.tabs.some((t) => t.id === s.active)) s.active = s.tabs[0]?.id ?? null;
+                    s.groups = s.groups.filter((x) => x !== g);
+                    this.commit();
+                };
+                if (!n) return go();
+                this.confirmMenu(e, `Delete "${g.name}" and Its Tabs?`, `Its ${n === 1 ? "tab" : `${n} tabs`} and their text will be lost.`, "Delete", go, g.color);
             } },
         ], g.color);
     }
@@ -1327,22 +1884,24 @@ class TabbedNoteUI {
         const s = this.s;
         const r = e.currentTarget.getBoundingClientRect();
         showMenu(r.left, r.bottom + 4, [
-            { label: "Horizontal tabs", checked: !this.vertical, action: () => { s.orientation = "horizontal"; this.commit(); } },
-            { label: "Vertical tabs", checked: this.vertical, action: () => { s.orientation = "vertical"; this.commit(); } },
+            { label: "Horizontal Tabs", checked: !this.vertical, action: () => { s.orientation = "horizontal"; this.commit(); } },
+            { label: "Vertical Tabs", checked: this.vertical, action: () => { s.orientation = "vertical"; this.commit(); } },
             { sep: true },
-            { label: "New tab", action: () => this.addTab() },
-            { label: "New group", action: () => this.addGroup() },
+            { label: "New Tab", action: () => this.addTab() },
+            { label: "New Group", action: () => this.addGroup() },
             { sep: true },
-            { label: "Collapse all groups", disabled: !s.groups.length, action: () => { s.groups.forEach((g) => (g.collapsed = true)); this.commit(); } },
-            { label: "Expand all groups", disabled: !s.groups.length, action: () => { s.groups.forEach((g) => (g.collapsed = false)); this.commit(); } },
+            { label: "Collapse all Groups", disabled: !s.groups.length, action: () => { s.groups.forEach((g) => (g.collapsed = true)); this.commit(); } },
+            { label: "Expand all Groups", disabled: !s.groups.length, action: () => { s.groups.forEach((g) => (g.collapsed = false)); this.commit(); } },
             ...this.ioItems(r),
+            { sep: true },
+            { note: `Version: ${VERSION}` },
         ]);
     }
 
     ioItems(r) {
         const s = this.s;
         if (this.node.tnFallback) {
-            return [{ sep: true }, { label: "Text input and outputs", hint: "needs tabbed_note.py", disabled: true }];
+            return [{ sep: true }, { label: "Text Input and Outputs", hint: "Needs tabbed_note.py", disabled: true }];
         }
         const outs = s.io.outputs;
         const kindLabel = (k) => OUTPUT_KINDS.find((o) => o.id === k)?.label ?? "Off";
@@ -1354,15 +1913,15 @@ class TabbedNoteUI {
         return [
             { sep: true },
             {
-                label: "Text input", checked: s.io.input,
-                hint: needsInput ? "used by pass-through" : "",
+                label: "Text Input", checked: s.io.input,
+                hint: needsInput ? "Used by Pass-Through" : "",
                 disabled: needsInput,
                 action: () => this.setInput(!s.io.input),
             },
             { label: "Output", hint: kindLabel(outs[0]), submenu: outItems(0) },
-            { label: "Second output", hint: kindLabel(outs[1]), disabled: !outs.length, submenu: outItems(1) },
+            { label: "Second Output", hint: kindLabel(outs[1]), disabled: !outs.length, submenu: outItems(1) },
             {
-                label: "Generated tab limit…", hint: String(s.genLimit),
+                label: "Generated Tab Limit…", hint: String(s.genLimit),
                 action: () => {
                     showMenu(r.left, r.bottom + 4, [{
                         input: String(s.genLimit), placeholder: "Number of tabs to keep (1 to 99)",
