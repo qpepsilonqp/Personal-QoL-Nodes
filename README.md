@@ -1,6 +1,6 @@
 ### Super-Power LoRA Loader:
 
-A loRA loader built for crazy people far too many loRAs for even a single model, to effectively manage their horde of loRAs. 
+A loRA loader built for crazy people far too many loRAs for even a single model, to effectively manage their horde of loRAs, *and yes the name is meant to be corny*. 
 
 *still in beta, so some things may change, but it should be just how functions are displayed rather than any fictionality additions or changes, feel free to throw in your 2 cents.* 
 
