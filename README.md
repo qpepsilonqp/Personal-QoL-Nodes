@@ -22,7 +22,7 @@ Just drag the node narrow enough and it will automatically compact everything th
 
 **Plain List mode:** 
 
-while collapsing enabled can make it like the rgthree's Power Lora Loader, but with search, bookmarks, favourites, mixes and being able to move in whole folder trees of loras if you so choose, also limits you to 20 rows before enabling scrolling, that this as you're hint that you're using the node wrong.
+while collapsing enabled can make it like the rgthree's Power Lora Loader, but with search, bookmarks, favourites, mixes and being able to move in whole folder trees of loras if you so choose, also limits you to 20 rows before enabling scrolling, take that as your hint that you're using the node wrong.
 
 <img src="Img/Loader_Plane-List.jpg" width="300">.
 
