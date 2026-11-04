@@ -1,4 +1,4 @@
-### Super-Power LoRA Loader:
+## Super-Power LoRA Loader:
 
 A loRA loader built for crazy people far too many loRAs for even a single model, to effectively manage their horde of loRAs, *and yes the name is meant to be corny*. 
 
@@ -10,9 +10,12 @@ A loRA loader built for crazy people far too many loRAs for even a single model,
 
 every mode switch is 1 click, 2 clicks for one which will ask if you want it to be the default behaviour with a check box, then it gets out of your way and is 1 click.
 
-**Setup Wizard:** automatically finds all `ComfyUI/model/loras` location—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
+**Setup Wizard:** 
+
+automatically finds all `ComfyUI/model/loras` location—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
 **Narrow Mode:** 
+
 Just drag the node narrow enough and it will automatically compact everything that needs compacting, everything is still accessible by hovering over the vertical "..." icons and in the case of model strength hover over the compact model strength.
 
 <img src="Img/Compact_Loader_W-STR_L-INFO_Trig_Star-L.jpg" width="300">. <img src="Img/Compact_Loader_W-SRT.jpg" width="300">.
@@ -37,7 +40,7 @@ probably the only thing I need to explain, a Mix here is a collection of loRAs y
 
 
 
-### TabbedNote:
+## TabbedNote:
 For organising a Notes and Markdown Notes into a centralised location, all data kept within the workflow, 
 
 <img src="Img/TabbedNote_Tab-Types.jpg" width="400">.
@@ -68,7 +71,7 @@ Double click the Tag List to edit, just like Markdown Note.
 
 
 
-### Nodes 2.0 front-end patch for rgthree-comfy:
+## Nodes 2.0 front-end patch for rgthree-comfy:
 <img src="Img/rgthree_comfy_2.0_nodes.jpg" width="400">.
 
 Why I have bothered? 
@@ -86,13 +89,13 @@ I noticed a generation speed increase with nodes 2.0 when you are having to bloc
 ### Seed History: 
 Find yourself realising you had a good seed, but now you have lost it, feed your seed into this node and keep a history, so you never have to regret losing a seed again. *Will likely add a combined seed generator with history.*
 
-### Sigmas at Step:
+## Sigmas at Step:
 Useful for nodes that use a sigmas value to activate or deactivate in an intuitive manner.
 
-### Sigmas at Percent:
+## Sigmas at Percent:
 Same as sigmas at step, but this time with percentages, actually less useful, but I created it so... why not add it, someone might find a use case where it's more useful.
 
-### Force Changed
+## Force Changed
 Useful when you have stateful nodes which don't reset on completion of the generation, literally the only reason for this node, but when it comes in handy, it's so handy. Just wire it in before the stateful node and it will registerer the text or seed change and force an is_changed for everything after the node.
 
 *All nodes made with Claude so if you don't like AI, it's fine, just don't use it, but I will say that I have spent like 14 roads of coding with Claude to get the lora loader how I like it, and I think 6 for the tabbednote, so it's not just AI slop. IT'S REFINED AI SLOP, DAMMIT!*
