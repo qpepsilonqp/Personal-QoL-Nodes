@@ -57,7 +57,7 @@ Double click the Tag List to edit, just like Markdown Note.
 **Edit Formatting:**
 -  `# the headline name` for headline
 -  `## the sub-headline name` for sub-headline
--  `/#` to close a headline, *only necessary when you want the sub-headline/s after not to be in the last headline.*
+-  `/#` to close a headline, *only necessary when you want the sub-headline/s and/or chip/s after not to be in the last headline.*
 -  `/##` to close a sub-headline, *only necessary when you want the chip/s after not to be in the last sub-headline.* 
 -  `the tag | the tag's tooltip`
 -  Create a new line per item that you want to be a chip.
