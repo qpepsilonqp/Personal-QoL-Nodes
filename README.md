@@ -12,7 +12,7 @@ every mode switch is 1 click, 2 clicks for one which will ask if you want it to 
 
 **Setup Wizard:** 
 
-automatically finds all `ComfyUI/model/loras` location—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
+automatically finds all `ComfyUI/model/loras` locations—for those particularly masochistic individuals among us, that have multiple insistences of ComfyUI and refuse to have a centralised location for their models—and allows you to select all Folder trees and individual loras you want on dropping the node on the canvas.
 
 **Narrow Mode:** 
 
