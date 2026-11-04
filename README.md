@@ -61,7 +61,7 @@ Double click the Tag List to edit, just like Markdown Note.
 -  `/##` to close a sub-headline, *only necessary when you want the chip/s after not to be in the last sub-headline.* 
 -  `the tag | the tag's tooltip`
 -  Create a new line per item that you want to be a chip.
--  If you can't be bothered with formatting the list yourself, get a competent LLM to do it, feed them the formatting rules and what you want in each headline sub headline. 
+-  If you can't be bothered with formatting the list yourself, get a competent LLM to do it, feed them the formatting rules and what you want in each headline and sub-headline. 
 
 **Copying Chips:**
 -  Click individual chips to copy them to clipboard.
