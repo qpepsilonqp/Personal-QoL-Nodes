@@ -78,6 +78,8 @@ Why I have bothered?
 
 I noticed a generation speed increase with nodes 2.0 when you are having to block swap a lot—aka you don't have enough VRAM to contain most of the blocks + the attention layers a—with nodes 2.0 vs classic canvas. probably has something to do with Nodes 2.0 only updating what absolutely needs to be update because it's actually a fair bit more heavy weight than classic canvas, so it needs more considerate about when it updates to keep it competitive, your mileage may vary, but personally when doing video generations I have noticed a significant difference especially when moving on the canvas while doing a video generation, from 35s/it to 25 - 29s/it when not touching anything and 60 - 90/s vs 29 - 30s/it when moving about the canvas.
 
+**TL;DR** Nodes 2.0 faster generation when not enough VRAM, so this.
+
 #### Reload between switches between Classic Canvas and Nodes 2.0!
 
   *Gets a lot less complicated, but much more boring and/or niche here for sure, so in order of least boring and niche, although they're self explanatory basic nodes so no picture.*
